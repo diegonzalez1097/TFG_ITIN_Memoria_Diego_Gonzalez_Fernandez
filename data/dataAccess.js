@@ -24,14 +24,37 @@ exports.getUser = (userName) => {
     });
   };
 
-exports.getAllUsers = () => {
+  exports.getAllUsers = () => {
     return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM prueba', (err, results) => {
-        if (err) {
+        connection.query('SELECT * FROM prueba', (err, results) => {
+            if (err) {
+                reject(err);
+            } else {
+                // Mapea los resultados para cambiar la estructura de los objetos
+                const transformedResults = results.map(result => {
+                    return { nombre: result.Usuario, edad: result.edad };
+                });
+                resolve(transformedResults);
+            }
+        });
+    });
+};
+
+exports.getUserAge = (userName) => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT edad FROM prueba WHERE Usuario = ?', [userName], (err, results) => {
+      if (err) {
         reject(err);
+      } else {
+        // Si el usuario existe, results[0] será su registro
+        // Si el usuario no existe, results[0] será undefined
+        const user = results[0];
+        if (user) {
+          resolve(user.edad);
         } else {
-        resolve(results);
+          resolve(null);
         }
+      }
     });
-    });
+  });
 };

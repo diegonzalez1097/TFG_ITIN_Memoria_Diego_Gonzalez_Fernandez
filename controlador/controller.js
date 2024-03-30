@@ -23,3 +23,18 @@ exports.handleGetAllUsersRequest = (req, res) => {
         res.end(err.message);
       });
   };
+
+  exports.getUserAge = async (req, res) => {
+    const userName = req.params.username;
+    try {
+      const age = await dataAccess.getUserAge(userName);
+      if (age !== null) {
+        res.json({ age });
+      } else {
+        res.status(404).send('Usuario no encontrado');
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error al obtener la edad del usuario');
+    }
+  };

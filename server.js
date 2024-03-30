@@ -1,7 +1,7 @@
 const http = require('http');
-const userController = require('./controlador/controller');
+const handleRequest = require('./api/api');
 
-const server = http.createServer(userController.handleRequest);
+const server = http.createServer(handleRequest);
 
 const port = 3000;
 
