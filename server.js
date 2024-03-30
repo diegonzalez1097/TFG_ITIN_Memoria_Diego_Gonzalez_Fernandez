@@ -1,7 +1,15 @@
 const http = require('http');
+const cors = require('cors');
 const handleRequest = require('./api/api');
 
-const server = http.createServer(handleRequest);
+// Create a CORS middleware
+const corsMiddleware = cors();
+
+const server = http.createServer((req, res) => {
+  corsMiddleware(req, res, () => {
+    handleRequest(req, res);
+  });
+});
 
 const port = 3000;
 
