@@ -1,18 +1,15 @@
-const http = require('http');
+const express = require('express');
 const cors = require('cors');
-const handleRequest = require('./api/api');
+const routes = require('./api/api');
 
-// Create a CORS middleware
-const corsMiddleware = cors();
+const app = express();
 
-const server = http.createServer((req, res) => {
-  corsMiddleware(req, res, () => {
-    handleRequest(req, res);
-  });
-});
+app.use(cors());
+app.use(express.json());
+app.use('/', routes);
 
 const port = 3000;
 
-server.listen(port, () => {
+app.listen(port, () => {
   console.log(`Servidor en ejecución en http://localhost:${port}/`);
 });

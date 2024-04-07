@@ -8,7 +8,7 @@ app.get('/', (req, res) => {
 
 app.get('/users', async (req, res) => {
   try {
-    const response = await axios.get('http://localhost:3000/users');
+    controller.handleGetAllUsersRequest(req, res);
     res.send(`<pre>${JSON.stringify(response.data, null, 2)}</pre>`);
   } catch (error) {
     console.error(error);

@@ -1,23 +1,26 @@
-
+const express = require('express');
+const router = express.Router();
 const controller = require('../controlador/controller');
 
-const handleRequest = (req, res) => {
-  const reqUrl = new URL(req.url, `http://${req.headers.host}`);
+router.get('/', (req, res) => {
+  res.send('Bienvenido a mi API!');
+});
 
-  if (reqUrl.pathname === '/users' && req.method === 'GET') {
-    controller.handleGetAllUsersRequest(req, res);
-  } else if (reqUrl.pathname.startsWith('/user/') && req.method === 'GET') {
-    const pathSegments = reqUrl.pathname.split('/');
-    const userName = pathSegments[2];
-    if (pathSegments.length === 4 && pathSegments[3] === 'age') {
-      controller.getUserAge(req, res, userName);
-    } else {
-      controller.handleGetUserRequest(req, res, userName);
-    }
-  } else {
-    res.writeHead(404, {'Content-Type': 'text/plain'});
-    res.end('Not Found\n');
-  }
-};
+router.get('/arduino-devices', controller.getAllArduinoDevices);
 
-module.exports = handleRequest;
+router.get('/arduino-devices', controller.getAllArduinoDevices);
+
+router.get('/users/:email', controller.getUserByEmail);
+
+router.post('/users', controller.createUser);
+
+router.get('/users', controller.getAllUsers);
+
+router.get('/arduino-devices/:id/sensors', controller.getSensorsByArduinoId);
+
+router.post('/arduino-devices', controller.createArduinoDevice);
+
+
+
+
+module.exports = router;
