@@ -8,8 +8,6 @@ router.get('/', (req, res) => {
 
 router.get('/arduino-devices', controller.getAllArduinoDevices);
 
-router.get('/arduino-devices', controller.getAllArduinoDevices);
-
 router.get('/users/:email', controller.getUserByEmail);
 
 router.post('/users', controller.createUser);
@@ -19,7 +17,6 @@ router.get('/users', controller.getAllUsers);
 router.get('/arduino-devices/:id/sensors', controller.getSensorsByArduinoId);
 
 router.post('/arduino-devices', controller.createArduinoDevice);
-
 
 
 

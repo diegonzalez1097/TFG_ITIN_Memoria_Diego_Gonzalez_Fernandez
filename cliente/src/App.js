@@ -1,10 +1,10 @@
 import React from 'react';
-import ServerCheck from './ServerCheck';
+import ArduinoList from './ArduinoList';
 
 function App() {
   return (
     <div className="App">
-      <ServerCheck />
+      <ArduinoList />
     </div>
   );
 }

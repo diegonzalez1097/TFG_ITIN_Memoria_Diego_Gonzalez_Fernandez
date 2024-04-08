@@ -120,7 +120,11 @@ exports.createArduinoDevice = (name, location, configState) => {
   });
 };
 
-
+/**
+ * Retrieves all users from the database.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of users.
+ * @throws {Error} If there is an error retrieving the users.
+ */
 exports.getAllUsers = () => {
   return new Promise((resolve, reject) => {
     connection.query('SELECT * FROM usuarios', (err, results) => {
