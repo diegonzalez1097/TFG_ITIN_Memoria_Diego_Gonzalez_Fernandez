@@ -5,12 +5,14 @@
 
 const mysql = require('mysql');
 
+require('dotenv').config();
+
 // Configura la conexión con la base de datos
 const connection = mysql.createConnection({
-  host: 'db', // El nombre del servicio de la base de datos en tu archivo docker-compose.yml
-  user: 'root', // El usuario de la base de datos
-  password: 'root', // La contraseña de la base de datos
-  database: 'cropsense', // El nombre de tu base de datos
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
 });
 
 /**
@@ -19,7 +21,10 @@ const connection = mysql.createConnection({
  * @throws {Error} If there is an error connecting to the database.
  */
 connection.connect((err) => {
-  if (err) throw err;/// quitar throw y poner console.log 
+  if (err){
+    console.error('Error al conectar a la base de datos MySQL: ' + err.stack);
+    return;
+  }
   console.log('Conectado a la base de datos MySQL!');
 });
 
@@ -102,15 +107,20 @@ exports.getSensorsByArduinoId = (arduinoId) => {
 
 /**
  * Creates a new Arduino device in the database.
+ * @param {number} userId - The id of the user.
  * @param {string} name - The name of the Arduino device.
  * @param {string} location - The location of the Arduino device.
- * @param {string} configState - The configuration state of the Arduino device.
+ * @param {string} lastIP - The last IP of the Arduino device.
+ * @param {Date} lastCommunicationDate - The last communication date of the Arduino device.
+ * @param {Object} gpsCoordinates - The GPS coordinates of the Arduino device.
  * @returns {Promise<Object>} A promise that resolves to the created Arduino device object.
  * @throws {Error} If there is an error creating the Arduino device.
  */
-exports.createArduinoDevice = (name, location, configState) => {
+exports.createArduinoDevice = (userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates) => {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO dispositivos_arduino (nombre, ubicacion, estadoConfiguracion) VALUES (?, ?, ?)', [name, location, configState], (err, results) => {
+    connection.query('INSERT INTO dispositivos_arduino (idUsuario, nombre, ubicacion, ultimaIP, fechaUltimaComunicacion, coordenadasGPS) VALUES (?, ?, ?, ?, ?, ST_GeomFromText(?))', 
+    [userId, name, location, lastIP, lastCommunicationDate, 'POINT(' + gpsCoordinates.x + ' ' + gpsCoordinates.y + ')'], 
+    (err, results) => {
       if (err) {
         reject(err);
       } else {
@@ -157,18 +167,36 @@ exports.deleteArduinoById = (arduinoId) => {
 
 
 /**
- * Fetches an Arduino device from the database by its ID.
- * @param {number} arduinoId - The ID of the Arduino device.
- * @returns {Promise<Object>} A promise that resolves to the Arduino device.
- * @throws {Error} If there is an error fetching the Arduino device.
+ * Retrieves a device by id from the database.
+ * @param {number} id - The id of the device.
+ * @returns {Promise<Object>} A promise that resolves to the device object.
+ * @throws {Error} If there is an error retrieving the device.
  */
-exports.getArduinoById = (arduinoId) => {
+exports.getArduinoById = (id) => {
   return new Promise((resolve, reject) => {
-    connection.query('SELECT * FROM dispositivos_arduino WHERE idDispositivo = ?', [arduinoId], (err, results) => {
+    connection.query('SELECT * FROM dispositivos_arduino WHERE idDispositivo = ?', [id], (err, results) => {
       if (err) {
         reject(err);
       } else {
         resolve(results[0]);
+      }
+    });
+  });
+};
+
+/**
+ * Retrieves all Arduino devices for a specific user from the database.
+ * @param {number} userId - The id of the user.
+ * @returns {Promise<Array>} A promise that resolves to an array of Arduino devices.
+ * @throws {Error} If there is an error retrieving the Arduino devices.
+ */
+exports.getArduinosByUserId = (userId) => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT * FROM dispositivos_arduino WHERE idUsuario = ?', [userId], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
       }
     });
   });
