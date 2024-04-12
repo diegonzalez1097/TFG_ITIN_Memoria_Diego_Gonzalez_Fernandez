@@ -19,7 +19,7 @@ const connection = mysql.createConnection({
  * @throws {Error} If there is an error connecting to the database.
  */
 connection.connect((err) => {
-  if (err) throw err;
+  if (err) throw err;/// quitar throw y poner console.log 
   console.log('Conectado a la base de datos MySQL!');
 });
 
@@ -132,6 +132,43 @@ exports.getAllUsers = () => {
         reject(err);
       } else {
         resolve(results);
+      }
+    });
+  });
+};
+
+/**
+ * Deletes an Arduino device from the database.
+ * @param {number} arduinoId - The ID of the Arduino device.
+ * @returns {Promise<void>} A promise that resolves when the Arduino device has been deleted.
+ * @throws {Error} If there is an error deleting the Arduino device.
+ */
+exports.deleteArduinoById = (arduinoId) => {
+  return new Promise((resolve, reject) => {
+    connection.query('DELETE FROM dispositivos_arduino WHERE idDispositivo = ?', [arduinoId], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+};
+
+
+/**
+ * Fetches an Arduino device from the database by its ID.
+ * @param {number} arduinoId - The ID of the Arduino device.
+ * @returns {Promise<Object>} A promise that resolves to the Arduino device.
+ * @throws {Error} If there is an error fetching the Arduino device.
+ */
+exports.getArduinoById = (arduinoId) => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT * FROM dispositivos_arduino WHERE idDispositivo = ?', [arduinoId], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results[0]);
       }
     });
   });
