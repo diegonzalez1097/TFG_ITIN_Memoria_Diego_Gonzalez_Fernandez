@@ -15,6 +15,20 @@ router.get('/', (req, res) => {
 
 //Rutas de usuario
 
+// Rutas de inicio de sesión
+// Estas rutas no deben requerir un token
+router.post('/login', async (req, res) => {
+  try {
+    const user = await userController.loginUser(req.body);
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+
+router.use(userController.verifyToken);
 //GETS
 router.get('/users/:email', async (req, res) => {
   try {
@@ -42,6 +56,7 @@ router.get('/users/:userId/arduinos', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 
 //POSTS
