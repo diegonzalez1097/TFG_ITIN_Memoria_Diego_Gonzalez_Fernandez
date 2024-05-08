@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const dataAccess = require('../data/dataAccess');
+
+const arduinoAccess = require('../data/arduinoData');
 
 
 /**
@@ -9,7 +10,7 @@ const dataAccess = require('../data/dataAccess');
  */
 exports.getAllArduinoDevices = () => {
 
-  return dataAccess.getAllArduinoDevices();
+  return arduinoAccess.getAllArduinoDevices();
 };
 
 
@@ -20,7 +21,7 @@ exports.getAllArduinoDevices = () => {
  */
 exports.getSensorsByArduinoId = (arduinoId) => {
 
-    return dataAccess.getSensorsByArduinoId(arduinoId);
+    return arduinoAccess.getSensorsByArduinoId(arduinoId);
 };
 
 
@@ -39,7 +40,7 @@ exports.createArduinoDevice = (deviceData) => {
 
     const { userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates } = deviceData;
 
-    return dataAccess.createArduinoDevice(userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates);
+    return arduinoAccess.createArduinoDevice(userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates);
 };
 
 
@@ -49,7 +50,7 @@ exports.createArduinoDevice = (deviceData) => {
  * @returns {Promise} Una promesa que se resuelve cuando el dispositivo Arduino se ha eliminado.
  */
 exports.deleteArduino = (arduinoId) => {
-    return dataAccess.deleteArduinoById(arduinoId);
+    return arduinoAccess.deleteArduinoById(arduinoId);
 };
  
 
@@ -59,7 +60,7 @@ exports.deleteArduino = (arduinoId) => {
  * @returns {Promise<Object>} Una promesa que se resuelve con el dispositivo Arduino.
  */
 exports.getArduinoById = (arduinoId) => {
-    return dataAccess.getArduinoById(arduinoId);
+    return arduinoAccess.getArduinoById(arduinoId);
 };
 
 
@@ -69,5 +70,5 @@ exports.getArduinoById = (arduinoId) => {
  * @returns {Promise<Array>} Una promesa que se resuelve con un array de dispositivos Arduino.
  */
 exports.getArduinosByUserId = (userId) => {
-    return dataAccess.getArduinosByUserId(userId);
+    return arduinoAccess.getArduinosByUserId(userId);
   };

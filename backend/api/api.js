@@ -18,11 +18,13 @@ router.get('/', (req, res) => {
 // Rutas de inicio de sesión
 // Estas rutas no deben requerir un token
 router.post('/login', async (req, res) => {
-  try {
-    const user = await userController.loginUser(req.body);
+  const { email, password } = req.body;
+  const user = await userController.loginUser({ email, password });
+
+  if (user === false) {
+    res.status(401).json({ message: 'Correo electrónico o contraseña incorrectos.' });
+  } else {
     res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
   }
 });
 

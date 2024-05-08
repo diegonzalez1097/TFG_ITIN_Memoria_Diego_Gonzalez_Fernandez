@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const dataAccess = require('../data/dataAccess');
+const userAccess = require('../data/userData');
+const arduinoAccess = require('../data/arduinoData');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
@@ -24,7 +25,7 @@ exports.createUser = async (userData) => {
 
     // Llama a la función createUser del módulo dataAccess con la contraseña cifrada.
     // Esta función debería devolver una promesa que se resuelve con el usuario creado.
-    return dataAccess.createUser(name, email, hashedPassword);
+    return userAccess.createUser(name, email, hashedPassword);
 };
 
 /**
@@ -35,7 +36,7 @@ exports.createUser = async (userData) => {
 exports.getUserByEmail = (email) => {
     // Llama a la función getUserByEmail del módulo dataAccess.
     // Esta función debería devolver una promesa que se resuelve con el usuario correspondiente.
-    return dataAccess.getUserByEmail(email);
+    return userAccess.getUserByEmail(email);
 };
 
 
@@ -46,7 +47,7 @@ exports.getUserByEmail = (email) => {
 exports.getAllUsers = () => {
     // Llama a la función getAllUsers del módulo dataAccess.
     // Esta función debería devolver una promesa que se resuelve con todos los usuarios.
-    return dataAccess.getAllUsers();
+    return userAccess.getAllUsers();
 };
 
 
@@ -62,12 +63,12 @@ exports.getAllUsers = () => {
 exports.loginUser = async (loginData) => {
     const { email, password } = loginData;
 
-    const user = await dataAccess.getUserByEmail(email);
+    const user = await userAccess.getUserByEmail(email);
 
     
 
     if (!user || !await bcrypt.compare(password, user['contraseña'])) {
-        throw new Error('Correo electrónico o contraseña incorrectos.');
+        return false;
     }
     // no mostrar mail 
     
