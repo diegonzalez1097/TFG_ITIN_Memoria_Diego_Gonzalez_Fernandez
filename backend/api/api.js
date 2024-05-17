@@ -14,7 +14,19 @@ router.get('/', (req, res) => {
 
 
 //Rutas de usuario
-
+router.post('/users', async (req, res) => {
+  try {
+    const user = await userController.createUser(req.body);
+    res.status(201).json(user);
+  } catch (err) {
+    if (err.message === 'Email already exists') {
+      res.status(409).json({ message: err.message });
+    } else {
+      // pendiente de más cosas
+      res.status(500).json({ message: err.message });
+    }
+  }
+});
 // Rutas de inicio de sesión
 // Estas rutas no deben requerir un token
 router.post('/login', async (req, res) => {
@@ -62,19 +74,7 @@ router.get('/users/:userId/arduinos', async (req, res) => {
 
 
 //POSTS
-router.post('/users', async (req, res) => {
-  try {
-    const user = await userController.createUser(req.body);
-    res.status(201).json(user);
-  } catch (err) {
-    if (err.message === 'Email already exists') {
-      res.status(409).json({ message: err.message });
-    } else {
-      // pendiente de más cosas
-      res.status(500).json({ message: err.message });
-    }
-  }
-});
+
 
 
 //Rutas de dispositivos Arduino

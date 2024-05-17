@@ -75,17 +75,19 @@ exports.getSensorsByArduinoId = (arduinoId) => {
  * @returns {Promise<Object>} A promise that resolves to the created Arduino device object.
  * @throws {Error} If there is an error creating the Arduino device.
  */
-exports.createArduinoDevice = (userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates) => {
+exports.createArduinoDevice = (userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac) => {
   return new Promise((resolve, reject) => {
-    connection.query('INSERT INTO dispositivos_arduino (idUsuario, nombre, ubicacion, ultimaIP, fechaUltimaComunicacion, coordenadasGPS) VALUES (?, ?, ?, ?, ?, ST_GeomFromText(?))', 
-    [userId, name, location, lastIP, lastCommunicationDate, 'POINT(' + gpsCoordinates.x + ' ' + gpsCoordinates.y + ')'], 
-    (err, results) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(results);
+    connection.query(
+      'INSERT INTO dispositivos_arduino (idUsuario, nombre, ubicacion, ultimaIP, fechaUltimaComunicacion, coordenadasGPS, mac) VALUES (?, ?, ?, ?, ?, ST_GeomFromText(?), ?)', 
+      [userId, name, location, lastIP, lastCommunicationDate, 'POINT(' + gpsCoordinates.x + ' ' + gpsCoordinates.y + ')', mac], 
+      (err, results) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(results);
+        }
       }
-    });
+    );
   });
 };
 
