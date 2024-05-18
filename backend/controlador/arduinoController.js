@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+
 const arduinoAccess = require('../data/arduinoData');
 
 
@@ -37,10 +38,8 @@ exports.getSensorsByArduinoId = (arduinoId) => {
  * @returns {Promise<Object>} Una promesa que se resuelve con el dispositivo Arduino creado.
  */
 exports.createArduinoDevice = (deviceData) => {
-
-    const { userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates } = deviceData;
-
-    return arduinoAccess.createArduinoDevice(userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates);
+    const { userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac } = deviceData;
+    return arduinoAccess.createArduinoDevice(userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac);
 };
 
 
@@ -71,4 +70,13 @@ exports.getArduinoById = (arduinoId) => {
  */
 exports.getArduinosByUserId = (userId) => {
     return arduinoAccess.getArduinosByUserId(userId);
-  };
+};
+
+/**
+ * Obtiene todos los dispositivos Arduino para una dirección MAC específica.
+ * @param {string} mac - La dirección MAC.
+ * @returns {Promise<Array>} Una promesa que se resuelve con un array de dispositivos Arduino.
+ */
+exports.getArduinosByMac = (mac) => {
+    return arduinoAccess.getArduinosByMac(mac);
+};

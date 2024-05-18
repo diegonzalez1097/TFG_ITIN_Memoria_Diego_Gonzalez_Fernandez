@@ -146,3 +146,22 @@ exports.getArduinosByUserId = (userId) => {
     });
   });
 };
+
+/**
+ * Get Arduino devices by MAC address.
+ *
+ * @param {string} mac The MAC address of the Arduino device.
+ * @returns {Promise} A promise that resolves to the Arduino devices that match the MAC address.
+ * @throws {Error} If there is an error retrieving the Arduino devices.
+ */
+exports.getArduinosByMac = (mac) => {
+  return new Promise((resolve, reject) => {
+    connection.query('SELECT * FROM dispositivos_arduino WHERE mac = ?', [mac], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};

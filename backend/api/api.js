@@ -42,6 +42,7 @@ router.post('/login', async (req, res) => {
 
 
 
+
 router.use(userController.verifyToken);
 //GETS
 router.get('/users/:email', async (req, res) => {
@@ -71,7 +72,15 @@ router.get('/users/:userId/arduinos', async (req, res) => {
   }
 });
 
-
+router.get('/arduinos/:macAddress', async (req, res) => {
+  try {
+    const macAddress = decodeURIComponent(req.params.macAddress);
+    const arduinos = await arduinoController.getArduinosByMac(macAddress);
+    res.json(arduinos);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 //POSTS
 
@@ -99,6 +108,7 @@ router.get('/arduino-devices/:id', async (req, res) => {
   }
 });
 
+
 router.get('/arduino-devices', async (req, res) => {
   try {
     const devices = await arduinoController.getAllArduinoDevices();
@@ -107,6 +117,7 @@ router.get('/arduino-devices', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+
 
 
 //POSTS
