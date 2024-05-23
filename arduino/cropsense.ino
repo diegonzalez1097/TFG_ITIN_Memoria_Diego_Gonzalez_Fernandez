@@ -89,7 +89,7 @@ String token;
   http.end();
 }
 unsigned long lastTime = 0;  // Almacena la última vez que se ejecutó el código
-unsigned long interval = 600000;  // Intervalo de tiempo (5 segundos)
+unsigned long interval = 3600000;  // Intervalo de tiempo 
 
 
 // Función de configuración que se ejecuta una vez al inicio
@@ -155,15 +155,28 @@ void loop() {
     }
   }
 
+    timeClient.update();
+
+  //String fechaHora = timeClient.getFormattedDate() + " " + timeClient.getFormattedTime();
+  //Serial.println(fechaHora);
+
+  timeClient.update();
+  time_t rawtime = timeClient.getEpochTime();
+  struct tm * ti;
+  ti = localtime (&rawtime);
+  char fechaHora[80];
+  strftime (fechaHora,80,"%Y-%m-%d %H:%M:%S",ti);
+  Serial.println(fechaHora);
+
   // Inicia una conexión al servidor
   http.begin(client, "http://192.168.1.137:3000/arduino/register");
   // Crea un objeto JSON con los datos del dispositivo
   StaticJsonDocument<200> doc;
   
   doc["name"] = "ADR1";
-  doc["location"] = nullptr;
+  doc["location"] = "Aviles";
   doc["lastIP"] = WiFi.localIP().toString();
-  doc["lastCommunicationDate"] = nullptr;
+  doc["lastCommunicationDate"] = fechaHora;
   JsonObject gpsCoordinates = doc.createNestedObject("gpsCoordinates");
   gpsCoordinates["x"] = 43.550299; // reemplaza con la coordenada x de tu dispositivo
   gpsCoordinates["y"] = -5.922112; // reemplaza con la coordenada y de tu dispositivo
@@ -232,18 +245,7 @@ void loop() {
     Serial.println("%");
   }
 
-  timeClient.update();
 
-  //String fechaHora = timeClient.getFormattedDate() + " " + timeClient.getFormattedTime();
-  //Serial.println(fechaHora);
-
-  timeClient.update();
-  time_t rawtime = timeClient.getEpochTime();
-  struct tm * ti;
-  ti = localtime (&rawtime);
-  char fechaHora[80];
-  strftime (fechaHora,80,"%Y-%m-%d %H:%M:%S",ti);
-  Serial.println(fechaHora);
 
   unsigned long currentTime = millis();  // Obtiene el tiempo actual
   if (currentTime - lastTime >= interval) {  // Comprueba si han pasado 5 segundos
@@ -253,6 +255,7 @@ void loop() {
     sendHttpRequest(http, client, token, fechaHora, hume, 2);
     sendHttpRequest(http, client, token, fechaHora, SoilMoisturePercentage, 3);
     sendHttpRequest(http, client, token, fechaHora, raw_temperatureC, 4);
+    
   }
 
   // Espera (x*1000) segundos antes de la próxima iteración
