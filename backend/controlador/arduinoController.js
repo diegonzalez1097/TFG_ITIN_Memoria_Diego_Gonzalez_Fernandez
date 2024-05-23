@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+const SECRET_KEY = process.env.SECRET_KEY;
+
 
 const arduinoAccess = require('../data/arduinoData');
 
@@ -79,4 +83,66 @@ exports.getArduinosByUserId = (userId) => {
  */
 exports.getArduinosByMac = (mac) => {
     return arduinoAccess.getArduinosByMac(mac);
+};
+
+/**
+ * Comprueba si existe un Arduino con una dirección MAC específica. Si no existe, crea uno nuevo.
+ * @param {string} mac - La dirección MAC.
+ * @returns {Promise<Object>} Una promesa que se resuelve con el dispositivo Arduino.
+ */
+exports.registroArduino = async (deviceData) => {
+    const { userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac } = deviceData;
+    let arduino = await arduinoAccess.getArduinosByMac(mac);
+
+    if (!arduino || arduino.length === 0) {
+        arduino = await arduinoAccess.createArduinoDevice(userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac);
+    }
+
+    // Crea un token JWT que incluye la dirección MAC del Arduino
+    const token = jwt.sign({ mac: arduino.mac }, process.env.SECRET_KEY, { expiresIn: '1h' });
+
+    return {
+        arduino,
+        token
+    };
+};
+
+
+/**
+ * Creates a new sensor in the database.
+ * @param {Object} sensorData - The sensor data.
+ * @returns {Promise<Object>} A promise that resolves when the sensor is successfully created.
+ * @throws {Error} If there is an error creating the sensor.
+ */
+exports.createSensor = async (sensorData) => {
+    const { deviceId, sensorType, associatedPins, description } = sensorData;
+    let sensor = await arduinoAccess.createSensor(deviceId, sensorType, associatedPins, description);
+
+    return sensor;
+};
+
+/**
+ * Updates an Arduino device.
+ * @param {string|number} idDispositivo - The ID of the Arduino device.
+ * @param {Object} updateData - The data to update the Arduino device with.
+ * @returns {Promise<Object>} A promise that resolves with the updated Arduino device.
+ * @throws {Error} If there is an error updating the Arduino device.
+ */
+exports.updateArduino = async (idDispositivo, updateData) => {
+    const updatedArduino = await arduinoAccess.updateArduino(idDispositivo, updateData);
+    return updatedArduino;
+  };
+
+
+  /**
+ * Inserts a new sensor reading into the database.
+ * @param {Object} readingData - The sensor reading data.
+ * @returns {Promise<Object>} A promise that resolves when the sensor reading is successfully inserted.
+ * @throws {Error} If there is an error inserting the sensor reading.
+ */
+exports.insertSensorReading = async (readingData) => {
+    const { sensorId, dateTime, value } = readingData;
+    let reading = await arduinoAccess.insertSensorReading(sensorId, dateTime, value);
+
+    return reading;
 };

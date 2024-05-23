@@ -165,3 +165,75 @@ exports.getArduinosByMac = (mac) => {
     });
   });
 };
+
+/**
+ * Creates a new sensor in the database.
+ * @param {number} deviceId - The id of the Arduino device.
+ * @param {string} sensorType - The type of the sensor.
+ * @param {string} associatedPins - The associated pins of the sensor.
+ * @param {string} description - The description of the sensor.
+ * @returns {Promise} A promise that resolves when the sensor is successfully created.
+ * @throws {Error} If there is an error creating the sensor.
+ */
+exports.createSensor = (deviceId, sensorType, associatedPins, description) => {
+  return new Promise((resolve, reject) => {
+    const query = 'INSERT INTO dispositivos_sensores (idDispositivo, tipoSensor, pinesAsociados, descripcion) VALUES (?, ?, ?, ?)';
+    connection.query(query, [deviceId, sensorType, associatedPins, description], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+
+/**
+ * Updates an Arduino device in the database.
+ * @param {number} idDispositivo - The id of the Arduino device.
+ * @param {Object} updateData - An object with the fields to update.
+ * @returns {Promise} A promise that resolves when the Arduino device is successfully updated.
+ * @throws {Error} If there is an error updating the Arduino device.
+ */
+exports.updateArduino = (idDispositivo, updateData) => {
+  const fields = Object.keys(updateData);
+  const values = Object.values(updateData);
+  values.push(idDispositivo);
+
+  const fieldUpdates = fields.map(field => `${field} = ?`).join(', ');
+
+  const query = `UPDATE dispositivos_arduino SET ${fieldUpdates} WHERE idDispositivo = ?`;
+
+  return new Promise((resolve, reject) => {
+    connection.query(query, values, (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+
+/**
+ * Inserts sensor reading into the database.
+ * @param {number} sensorId - The id of the sensor.
+ * @param {Date} dateTime - The date and time of the reading.
+ * @param {number} value - The value of the reading.
+ * @returns {Promise} A promise that resolves when the reading has been inserted.
+ * @throws {Error} If there is an error inserting the reading.
+ */
+exports.insertSensorReading = (sensorId, dateTime, value) => {
+  return new Promise((resolve, reject) => {
+    const query = 'INSERT INTO lecturas_sensores (idSensor, fechaHora, valor) VALUES (?, ?, ?)';
+    connection.query(query, [sensorId, dateTime, value], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};

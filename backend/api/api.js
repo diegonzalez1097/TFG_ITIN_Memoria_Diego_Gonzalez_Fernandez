@@ -40,6 +40,15 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.post('/arduino/register', async (req, res) => {
+  try {
+    const deviceData = req.body;
+    const arduino = await arduinoController.registroArduino(deviceData);
+    res.json(arduino);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 
 
@@ -130,6 +139,16 @@ router.post('/arduino-devices', async (req, res) => {
   }
 });
 
+router.post('/sensor/register', async (req, res) => {
+  try {
+    const sensorData = req.body;
+    const sensor = await arduinoController.createSensor(sensorData);
+    res.json(sensor);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 //DELETES
 router.delete('/arduino-devices/:id', async (req, res) => {
@@ -141,6 +160,25 @@ router.delete('/arduino-devices/:id', async (req, res) => {
   }
 });
 
+
+router.put('/arduino-devices/:id', async (req, res) => { //¿quitar id de endpoint?
+  try {
+    const updatedDevice = await arduinoController.updateArduino(req.params.id, req.body);
+    res.json(updatedDevice);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/sensor/reading', async (req, res) => {
+  try {
+    const readingData = req.body;
+    const reading = await arduinoController.insertSensorReading(readingData);
+    res.status(201).json(reading);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 
 module.exports = router;
