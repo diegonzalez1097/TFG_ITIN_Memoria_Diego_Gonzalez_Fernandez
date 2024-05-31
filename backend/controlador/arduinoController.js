@@ -91,11 +91,11 @@ exports.getArduinosByMac = (mac) => {
  * @returns {Promise<Object>} Una promesa que se resuelve con el dispositivo Arduino.
  */
 exports.registroArduino = async (deviceData) => {
-    const { userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac } = deviceData;
+    const { userId, name, location, ultimaIP, fechaUltimaComunicacion, gpsCoordinates, mac } = deviceData;
     let arduino = await arduinoAccess.getArduinosByMac(mac);
 
     if (!arduino || arduino.length === 0) {
-        arduino = await arduinoAccess.createArduinoDevice(userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac);
+        arduino = await arduinoAccess.createArduinoDevice(userId, name, location, ultimaIP, fechaUltimaComunicacion, gpsCoordinates, mac);
     }
 
     // Crea un token JWT que incluye la dirección MAC del Arduino
