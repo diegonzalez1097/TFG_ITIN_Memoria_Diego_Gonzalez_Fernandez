@@ -1,5 +1,5 @@
 /**
- * Module for accessing data from the database.
+ * Módulo para acceder a los datos de la base de datos.
  * @module dataAccess
  */
 
@@ -16,9 +16,9 @@ const connection = mysql.createConnection({
 });
 
 /**
- * Connects to the MySQL database.
- * @param {function} callback - The callback function to be executed after connecting to the database.
- * @throws {Error} If there is an error connecting to the database.
+ * Se conecta a la base de datos MySQL.
+ * @param {function} callback - La función de callback que se ejecutará después de conectarse a la base de datos.
+ * @throws {Error} Si hay un error al conectarse a la base de datos.
  */
 connection.connect((err) => {
   if (err){
@@ -29,9 +29,9 @@ connection.connect((err) => {
 });
 
 /**
- * Retrieves all Arduino devices from the database.
- * @returns {Promise<Array<Object>>} A promise that resolves to an array of Arduino devices.
- * @throws {Error} If there is an error retrieving the Arduino devices.
+ * Recupera todos los dispositivos Arduino de la base de datos.
+ * @returns {Promise<Array<Object>>} Una promesa que se resuelve a un array de dispositivos Arduino.
+ * @throws {Error} Si hay un error al recuperar los dispositivos Arduino.
  */
 exports.getAllArduinoDevices = () => {
   return new Promise((resolve, reject) => {
@@ -47,10 +47,10 @@ exports.getAllArduinoDevices = () => {
 
 
 /**
- * Retrieves all sensors for a given Arduino device from the database.
- * @param {number} arduinoId - The ID of the Arduino device.
- * @returns {Promise<Array<Object>>} A promise that resolves to an array of sensors.
- * @throws {Error} If there is an error retrieving the sensors.
+ * Recupera todos los sensores para un dispositivo Arduino dado de la base de datos.
+ * @param {number} arduinoId - El ID del dispositivo Arduino.
+ * @returns {Promise<Array<Object>>} Una promesa que se resuelve a un array de sensores.
+ * @throws {Error} Si hay un error al recuperar los sensores.
  */
 exports.getSensorsByArduinoId = (arduinoId) => {
   return new Promise((resolve, reject) => {
@@ -65,15 +65,15 @@ exports.getSensorsByArduinoId = (arduinoId) => {
 };
 
 /**
- * Creates a new Arduino device in the database.
- * @param {number} userId - The id of the user.
- * @param {string} name - The name of the Arduino device.
- * @param {string} location - The location of the Arduino device.
- * @param {string} lastIP - The last IP of the Arduino device.
- * @param {Date} lastCommunicationDate - The last communication date of the Arduino device.
- * @param {Object} gpsCoordinates - The GPS coordinates of the Arduino device.
- * @returns {Promise<Object>} A promise that resolves to the created Arduino device object.
- * @throws {Error} If there is an error creating the Arduino device.
+ * Crea un nuevo dispositivo Arduino en la base de datos.
+ * @param {number} userId - El id del usuario.
+ * @param {string} name - El nombre del dispositivo Arduino.
+ * @param {string} location - La ubicación del dispositivo Arduino.
+ * @param {string} lastIP - La última IP del dispositivo Arduino.
+ * @param {Date} lastCommunicationDate - La última fecha de comunicación del dispositivo Arduino.
+ * @param {Object} gpsCoordinates - Las coordenadas GPS del dispositivo Arduino.
+ * @returns {Promise<Object>} Una promesa que se resuelve al objeto del dispositivo Arduino creado.
+ * @throws {Error} Si hay un error al crear el dispositivo Arduino.
  */
 exports.createArduinoDevice = (userId, name, location, lastIP, lastCommunicationDate, gpsCoordinates, mac) => {
   return new Promise((resolve, reject) => {
@@ -93,10 +93,10 @@ exports.createArduinoDevice = (userId, name, location, lastIP, lastCommunication
 
 
 /**
- * Deletes an Arduino device from the database.
- * @param {number} arduinoId - The ID of the Arduino device.
- * @returns {Promise<void>} A promise that resolves when the Arduino device has been deleted.
- * @throws {Error} If there is an error deleting the Arduino device.
+ * Elimina un dispositivo Arduino de la base de datos.
+ * @param {number} arduinoId - El ID del dispositivo Arduino.
+ * @returns {Promise<void>} Una promesa que se resuelve cuando el dispositivo Arduino ha sido eliminado.
+ * @throws {Error} Si hay un error al eliminar el dispositivo Arduino.
  */
 exports.deleteArduinoById = (arduinoId) => {
   return new Promise((resolve, reject) => {
@@ -112,10 +112,10 @@ exports.deleteArduinoById = (arduinoId) => {
 
 
 /**
- * Retrieves a device by id from the database.
- * @param {number} id - The id of the device.
- * @returns {Promise<Object>} A promise that resolves to the device object.
- * @throws {Error} If there is an error retrieving the device.
+ * Recupera un dispositivo por id de la base de datos.
+ * @param {number} id - El id del dispositivo.
+ * @returns {Promise<Object>} Una promesa que se resuelve al objeto del dispositivo.
+ * @throws {Error} Si hay un error al recuperar el dispositivo.
  */
 exports.getArduinoById = (id) => {
   return new Promise((resolve, reject) => {
@@ -130,10 +130,10 @@ exports.getArduinoById = (id) => {
 };
 
 /**
- * Retrieves all Arduino devices for a specific user from the database.
- * @param {number} userId - The id of the user.
- * @returns {Promise<Array>} A promise that resolves to an array of Arduino devices.
- * @throws {Error} If there is an error retrieving the Arduino devices.
+ * Recupera todos los dispositivos Arduino para un usuario específico de la base de datos.
+ * @param {number} userId - El id del usuario.
+ * @returns {Promise<Array>} Una promesa que se resuelve a un array de dispositivos Arduino.
+ * @throws {Error} Si hay un error al recuperar los dispositivos Arduino.
  */
 exports.getArduinosByUserId = (userId) => {
   return new Promise((resolve, reject) => {
@@ -148,11 +148,11 @@ exports.getArduinosByUserId = (userId) => {
 };
 
 /**
- * Get Arduino devices by MAC address.
+ * Obtiene dispositivos Arduino por dirección MAC.
  *
- * @param {string} mac The MAC address of the Arduino device.
- * @returns {Promise} A promise that resolves to the Arduino devices that match the MAC address.
- * @throws {Error} If there is an error retrieving the Arduino devices.
+ * @param {string} mac La dirección MAC del dispositivo Arduino.
+ * @returns {Promise} Una promesa que se resuelve a los dispositivos Arduino que coinciden con la dirección MAC.
+ * @throws {Error} Si hay un error al recuperar los dispositivos Arduino.
  */
 exports.getArduinosByMac = (mac) => {
   return new Promise((resolve, reject) => {
@@ -167,13 +167,13 @@ exports.getArduinosByMac = (mac) => {
 };
 
 /**
- * Creates a new sensor in the database.
- * @param {number} deviceId - The id of the Arduino device.
- * @param {string} sensorType - The type of the sensor.
- * @param {string} associatedPins - The associated pins of the sensor.
- * @param {string} description - The description of the sensor.
- * @returns {Promise} A promise that resolves when the sensor is successfully created.
- * @throws {Error} If there is an error creating the sensor.
+ * Crea un nuevo sensor en la base de datos.
+ * @param {number} deviceId - El id del dispositivo Arduino.
+ * @param {string} sensorType - El tipo del sensor.
+ * @param {string} associatedPins - Los pines asociados del sensor.
+ * @param {string} description - La descripción del sensor.
+ * @returns {Promise} Una promesa que se resuelve cuando el sensor se crea con éxito.
+ * @throws {Error} Si hay un error al crear el sensor.
  */
 exports.createSensor = (deviceId, sensorType, associatedPins, description) => {
   return new Promise((resolve, reject) => {
@@ -190,11 +190,11 @@ exports.createSensor = (deviceId, sensorType, associatedPins, description) => {
 
 
 /**
- * Updates an Arduino device in the database.
- * @param {number} idDispositivo - The id of the Arduino device.
- * @param {Object} updateData - An object with the fields to update.
- * @returns {Promise} A promise that resolves when the Arduino device is successfully updated.
- * @throws {Error} If there is an error updating the Arduino device.
+ * Actualiza un dispositivo Arduino en la base de datos.
+ * @param {number} idDispositivo - El id del dispositivo Arduino.
+ * @param {Object} updateData - Un objeto con los campos a actualizar.
+ * @returns {Promise} Una promesa que se resuelve cuando el dispositivo Arduino se actualiza con éxito.
+ * @throws {Error} Si hay un error al actualizar el dispositivo Arduino.
  */
 exports.updateArduino = (idDispositivo, updateData) => {
   const fields = Object.keys(updateData);
@@ -218,11 +218,12 @@ exports.updateArduino = (idDispositivo, updateData) => {
 
 
 /**
- * Inserts sensor readings into the database.
- * @param {Array} readings - An array of sensor reading data objects. Each object should have properties: sensorId, dateTime, value.
- * @returns {Promise} A promise that resolves when all readings have been inserted.
- * @throws {Error} If there is an error inserting a reading.
+ * Inserta lecturas de sensor en la base de datos.
+ * @param {Array} readings - Un array de objetos de datos de lectura del sensor. Cada objeto debe tener propiedades: sensorId, dateTime, value.
+ * @returns {Promise} Una promesa que se resuelve cuando todas las lecturas han sido insertadas.
+ * @throws {Error} Si hay un error al insertar una lectura.
  */
+//esta preparado para recibir arrays pero finalmente solo recibe un objeto
 exports.insertSensorReadings = (readings) => {
   return new Promise((resolve, reject) => {
     const query = 'INSERT INTO lecturas_sensores (idSensor, fechaHora, valor) VALUES ?';

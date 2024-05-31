@@ -8,6 +8,10 @@ const SECRET_KEY = process.env.SECRET_KEY;
 
 const arduinoAccess = require('../data/arduinoData');
 
+const cron = require('node-cron');
+
+let inMemoryReadings = [];
+
 
 /**
  * Obtiene todos los dispositivos Arduino.
@@ -109,10 +113,10 @@ exports.registroArduino = async (deviceData) => {
 
 
 /**
- * Creates a new sensor in the database.
- * @param {Object} sensorData - The sensor data.
- * @returns {Promise<Object>} A promise that resolves when the sensor is successfully created.
- * @throws {Error} If there is an error creating the sensor.
+ * Crea un nuevo sensor en la base de datos.
+ * @param {Object} sensorData - Los datos del sensor.
+ * @returns {Promise<Object>} Una promesa que se resuelve cuando el sensor se crea con éxito.
+ * @throws {Error} Si hay un error al crear el sensor.
  */
 exports.createSensor = async (sensorData) => {
     const { deviceId, sensorType, associatedPins, description } = sensorData;
@@ -122,11 +126,11 @@ exports.createSensor = async (sensorData) => {
 };
 
 /**
- * Updates an Arduino device.
- * @param {string|number} idDispositivo - The ID of the Arduino device.
- * @param {Object} updateData - The data to update the Arduino device with.
- * @returns {Promise<Object>} A promise that resolves with the updated Arduino device.
- * @throws {Error} If there is an error updating the Arduino device.
+ * Actualiza un dispositivo Arduino.
+ * @param {string|number} idDispositivo - El ID del dispositivo Arduino.
+ * @param {Object} updateData - Los datos para actualizar el dispositivo Arduino.
+ * @returns {Promise<Object>} Una promesa que se resuelve con el dispositivo Arduino actualizado.
+ * @throws {Error} Si hay un error al actualizar el dispositivo Arduino.
  */
 exports.updateArduino = async (idDispositivo, updateData) => {
     const updatedArduino = await arduinoAccess.updateArduino(idDispositivo, updateData);
@@ -135,10 +139,10 @@ exports.updateArduino = async (idDispositivo, updateData) => {
 
 
 /**
- * Inserts new sensor readings into the database.
- * @param {Array} readingsData - An array of sensor reading data objects.
- * @returns {Promise<Array>} A promise that resolves when all sensor readings are successfully inserted.
- * @throws {Error} If there is an error inserting a sensor reading.
+ * Inserta nuevas lecturas de sensor en la base de datos.
+ * @param {Array} readingsData - Un array de objetos de datos de lectura del sensor.
+ * @returns {Promise<Array>} Una promesa que se resuelve cuando todas las lecturas del sensor se insertan con éxito.
+ * @throws {Error} Si hay un error al insertar una lectura del sensor.
  */
 exports.insertSensorReadings = async (readingsData) => {
     let readings = [];
@@ -148,4 +152,43 @@ exports.insertSensorReadings = async (readingsData) => {
     }
 
     return readings;
+};
+
+
+/**
+ * Inserta nuevas lecturas de sensor en el array en memoria.
+ * @param {Array} readingsData - Un array de objetos de datos de lectura del sensor.
+ */
+exports.receiveSensorReadings = (readingsData, arduinoData) => {
+    for (let readingData of readingsData) {
+        inMemoryReadings.push(readingData);
+    }
+
+    // Extrae el idDispositivo de arduinoData
+    const { idDispositivo, ...updateData } = arduinoData;
+
+    // Llama a la función updateArduino con el idDispositivo y los datos de actualización
+    exports.updateArduino(idDispositivo, updateData);
+
+    return inMemoryReadings;
+};
+
+/**
+ * Esta función se ejecuta cada minuto (según lo programado por cron.schedule).
+ * Recorre el array `inMemoryReadings` y guarda cada lectura en la base de datos.
+ * Después de guardar todas las lecturas, vacía el array `inMemoryReadings`.
+ */
+cron.schedule('* * * * *', async () => {
+    for (let reading of inMemoryReadings) {
+        await exports.insertSensorReadings([reading]);
+    }
+    inMemoryReadings = [];
+});
+
+/**
+ * Devuelve el array en memoria de lecturas del sensor.
+ * @returns {Array} El array en memoria de lecturas del sensor.
+ */
+exports.getSensorReadings = () => {
+    return inMemoryReadings;
 };
