@@ -218,17 +218,16 @@ exports.updateArduino = (idDispositivo, updateData) => {
 
 
 /**
- * Inserts sensor reading into the database.
- * @param {number} sensorId - The id of the sensor.
- * @param {Date} dateTime - The date and time of the reading.
- * @param {number} value - The value of the reading.
- * @returns {Promise} A promise that resolves when the reading has been inserted.
- * @throws {Error} If there is an error inserting the reading.
+ * Inserts sensor readings into the database.
+ * @param {Array} readings - An array of sensor reading data objects. Each object should have properties: sensorId, dateTime, value.
+ * @returns {Promise} A promise that resolves when all readings have been inserted.
+ * @throws {Error} If there is an error inserting a reading.
  */
-exports.insertSensorReading = (sensorId, dateTime, value) => {
+exports.insertSensorReadings = (readings) => {
   return new Promise((resolve, reject) => {
-    const query = 'INSERT INTO lecturas_sensores (idSensor, fechaHora, valor) VALUES (?, ?, ?)';
-    connection.query(query, [sensorId, dateTime, value], (err, results) => {
+    const query = 'INSERT INTO lecturas_sensores (idSensor, fechaHora, valor) VALUES ?';
+    const values = readings.map(reading => [reading.sensorId, reading.dateTime, reading.value]);
+    connection.query(query, [values], (err, results) => {
       if (err) {
         reject(err);
       } else {

@@ -134,15 +134,18 @@ exports.updateArduino = async (idDispositivo, updateData) => {
   };
 
 
-  /**
- * Inserts a new sensor reading into the database.
- * @param {Object} readingData - The sensor reading data.
- * @returns {Promise<Object>} A promise that resolves when the sensor reading is successfully inserted.
- * @throws {Error} If there is an error inserting the sensor reading.
+/**
+ * Inserts new sensor readings into the database.
+ * @param {Array} readingsData - An array of sensor reading data objects.
+ * @returns {Promise<Array>} A promise that resolves when all sensor readings are successfully inserted.
+ * @throws {Error} If there is an error inserting a sensor reading.
  */
-exports.insertSensorReading = async (readingData) => {
-    const { sensorId, dateTime, value } = readingData;
-    let reading = await arduinoAccess.insertSensorReading(sensorId, dateTime, value);
+exports.insertSensorReadings = async (readingsData) => {
+    let readings = [];
+    for (let readingData of readingsData) {
+        let reading = await arduinoAccess.insertSensorReadings([readingData]);
+        readings.push(reading);
+    }
 
-    return reading;
+    return readings;
 };

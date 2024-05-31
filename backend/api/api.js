@@ -170,11 +170,11 @@ router.put('/arduino-devices/:id', async (req, res) => { //¿quitar id de endpoi
   }
 });
 
-router.post('/sensor/reading', async (req, res) => {
+router.post('/sensor/readings', async (req, res) => {
   try {
-    const readingData = req.body;
-    const reading = await arduinoController.insertSensorReading(readingData);
-    res.status(201).json(reading);
+    const readingsData = req.body;
+    const readings = await arduinoController.insertSensorReadings(readingsData);
+    res.status(201).json(readings);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
