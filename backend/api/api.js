@@ -181,5 +181,14 @@ router.post('/sensor/readings', async (req, res) => {
   }
 });
 
+router.get('/sensor/readings', async (req, res) => {
+  try {
+    const readings = await arduinoController.getSensorReadings();
+    res.status(200).json({ message: 'Lecturas obtenidas con exito.', readings });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 module.exports = router;

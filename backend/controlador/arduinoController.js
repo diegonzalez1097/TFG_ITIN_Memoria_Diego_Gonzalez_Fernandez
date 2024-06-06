@@ -160,16 +160,31 @@ exports.insertSensorReadings = async (readingsData) => {
  * @param {Array} readingsData - Un array de objetos de datos de lectura del sensor.
  */
 exports.receiveSensorReadings = (readingsData, arduinoData) => {
-    for (let readingData of readingsData) {
-        inMemoryReadings.push(readingData);
-    }
-
     // Extrae el idDispositivo de arduinoData
     const { idDispositivo, ...updateData } = arduinoData;
 
+    for (let readingData of readingsData) {
+        // Agrega el idDispositivo a readingData
+        readingData.deviceId = idDispositivo;
+    
+        // Verifica si la lectura ya existe en inMemoryReadings
+        const existingReadingIndex = inMemoryReadings.findIndex(reading => 
+            reading.sensorId === readingData.sensorId && 
+            reading.deviceId === readingData.deviceId
+        );
+    
+        // Si la lectura no existe en inMemoryReadings, la agrega
+        if (existingReadingIndex === -1) {
+            inMemoryReadings.push(readingData);
+        } else {
+            // Si la lectura ya existe, la actualiza
+            inMemoryReadings[existingReadingIndex] = readingData;
+        }
+    }
     // Llama a la función updateArduino con el idDispositivo y los datos de actualización
     exports.updateArduino(idDispositivo, updateData);
-
+    console.log('Adding data to inMemoryReadings:', arduinoData);
+    console.log(inMemoryReadings);
     return inMemoryReadings;
 };
 
@@ -178,11 +193,13 @@ exports.receiveSensorReadings = (readingsData, arduinoData) => {
  * Recorre el array `inMemoryReadings` y guarda cada lectura en la base de datos.
  * Después de guardar todas las lecturas, vacía el array `inMemoryReadings`.
  */
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 * * * *', async () => {
+    console.log('Running cron job. Current inMemoryReadings:', inMemoryReadings);
     for (let reading of inMemoryReadings) {
         await exports.insertSensorReadings([reading]);
     }
     inMemoryReadings = [];
+    console.log('Cron job finished. inMemoryReadings should be empty:', inMemoryReadings);
 });
 
 /**

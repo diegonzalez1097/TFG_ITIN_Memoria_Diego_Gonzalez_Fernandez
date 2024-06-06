@@ -1,0 +1,33 @@
+.weather-container {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 200px;
+    padding: 20px;
+    background-color: #f0f0f0;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .weather-container h1 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .weather-container p {
+    margin: 0;
+  }
+
+  .sensor-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .sensor-table th, .sensor-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  .sensor-table thead tr {
+    background-color: #f2f2f2;
+  }
