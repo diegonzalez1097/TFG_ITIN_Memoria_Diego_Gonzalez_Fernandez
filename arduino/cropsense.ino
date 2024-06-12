@@ -1,34 +1,23 @@
-// Incluye las bibliotecas necesarias para el funcionamiento del programa
-
-// DHT.h: Biblioteca para interactuar con los sensores de temperatura y humedad DHT.
 #include <DHT.h>
-// DHT_U.h: Biblioteca que proporciona una interfaz unificada para diferentes modelos de sensores DHT.
 #include <DHT_U.h>
-// OneWire.h: Biblioteca para comunicarse con dispositivos que utilizan el protocolo OneWire.
 #include <OneWire.h>
-// DallasTemperature.h: Biblioteca para interactuar con los sensores de temperatura de la familia Dallas.
 #include <DallasTemperature.h>
-// ESP8266WiFi.h: Biblioteca para manejar la conectividad WiFi en los microcontroladores ESP8266.
 #include <ESP8266WiFi.h>
-// ESP8266HTTPClient.h: Biblioteca para hacer solicitudes HTTP con un microcontrolador ESP8266.
 #include <ESP8266HTTPClient.h>
-
 #include <ArduinoJson.h>
-
 #include <NTPClient.h>
-
 #include <WiFiUdp.h>
 
-DHT dht(5,DHT11);
 
-// Define el pin para el bus OneWire
-const int oneWireBus = 4;
+//Define los pines para los sensores
+DHT dht(5,DHT11);// Sensor aire
+const int oneWireBus = 4;// Sensor temperatura
+const int sensorPin = A0;// Sensor tierra
 
-// Variables para almacenar las lecturas de temperatura y humedad
-float temp, hume;
 
-// Define el pin del sensor de humedad del suelo
-const int sensorPin = A0;
+float Temperatura, HumedadAire;
+
+
 
 // Inicializa el bus OneWire
 OneWire oneWire(oneWireBus);
@@ -40,12 +29,14 @@ const int medicionAgua = 216;
 
 // Variables para almacenar el nivel de humedad del suelo
 int MoistureLevel = 0;
-int SoilMoisturePercentage = 0;
+int HumedadTierra = 0;
 
 // Definir los pines de los LEDs
 const int rojo = 12;
 const int azul = 13;
 const int verde = 15;
+const int riego = 16;
+
 
 // Define las credenciales de la red WiFi
 const char* ssid = "6F0C";
@@ -61,39 +52,60 @@ String token;
 HTTPClient http;
 
 // Define la dirección base del servidor
-const char* servidor = "http://192.168.1.135:3000";
+const char* servidor = "http://192.168.1.139:3000";
 
 int idDispositivo = -1;  // Inicializa con un valor por defecto
 
-void sendHttpRequest(HTTPClient &http, WiFiClient &client, const String &token, const String &fechaHora, float value, int sensorId) {
-  // Especifica el URL del endpoint
-  http.begin(client, (String(servidor) + "/sensor/reading").c_str());
+String obtenerDatosSensor(int idArduino, const String &token) {
+  // Construye el URL con el ID del Arduino
+  String url = String(servidor) + "/arduino-devices/" + idArduino + "/sensors";
 
-  // Configura el encabezado de la solicitud para indicar que el cuerpo de la solicitud será un objeto JSON
-  http.addHeader("Content-Type", "application/json");
+  // Inicia la conexión con el servidor
+  http.begin(client, url.c_str());
 
   // Agrega el token al encabezado Authorization
   http.addHeader("Authorization", "Bearer " + token);
 
-  // Crea el cuerpo de la solicitud
-  String requestBody = "{ \"sensorId\": " + String(sensorId) + ", \"dateTime\": \"" + fechaHora + "\", \"value\": " + String(value) + " }";
+  // Realiza la solicitud GET
+  int httpCode = http.GET();
 
-  // Envía la solicitud POST
-  int httpCode = http.POST(requestBody);
-
-  // Comprueba el código de estado HTTP
+  // Verifica si la solicitud fue exitosa
   if (httpCode > 0) {
-    // Si la solicitud fue exitosa, imprime la respuesta
-    String response = http.getString();
-    Serial.println(response);
-  } else {
-    // Si la solicitud falló, imprime el error
-    Serial.println("Error en la solicitud: " + http.errorToString(httpCode));
-  }
+    // Obtiene la respuesta del servidor
+    String payload = http.getString();
+    Serial.println(payload); // Imprime la respuesta original
 
-  http.end();
+    // Parsea la respuesta JSON
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, payload);
+
+    // Crea un nuevo JSONDocument para los pares IdSensor y TipoSensor
+    DynamicJsonDocument filteredDoc(1024);
+    JsonArray filteredSensors = filteredDoc.to<JsonArray>();
+
+    // Extrae solo los pares IdSensor y TipoSensor
+    for (JsonObject elem : doc.as<JsonArray>()) {
+      JsonObject sensor = filteredSensors.createNestedObject();
+      sensor["idSensor"] = elem["idSensor"];
+      sensor["tipoSensor"] = elem["tipoSensor"];
+    }
+
+    // Serializa el JSON filtrado a String
+    String filteredPayload;
+    serializeJson(filteredSensors, filteredPayload);
+    Serial.println(filteredPayload); // Imprime el JSON filtrado
+
+    http.end(); // Cierra la conexión
+    return filteredPayload; // Devuelve el JSON filtrado
+  } else {
+    Serial.print("Error en la solicitud HTTP: ");
+    Serial.println(httpCode);
+    http.end(); // Cierra la conexión
+    return ""; 
+  }
 }
-void sendSensorData(HTTPClient &http, WiFiClient &client, const String &token, DynamicJsonDocument &sensorData) {
+
+bool sendSensorData(HTTPClient &http, WiFiClient &client, const String &token, DynamicJsonDocument &sensorData) {
   // Especifica el URL del endpoint
   http.begin(client, (String(servidor) + "/sensor/readings").c_str());
 
@@ -107,20 +119,33 @@ void sendSensorData(HTTPClient &http, WiFiClient &client, const String &token, D
   String requestBody;
   serializeJson(sensorData, requestBody);
 
-  // Envía la solicitud POST
   int httpCode = http.POST(requestBody);
 
-  // Comprueba el código de estado HTTP
+  bool necesitaRegar = false; // Variable para almacenar el estado de riego
+
   if (httpCode > 0) {
-    // Si la solicitud fue exitosa, imprime la respuesta
     String response = http.getString();
     Serial.println(response);
+
+    // Deserializa la respuesta JSON
+    DynamicJsonDocument respDoc(1024);
+    deserializeJson(respDoc, response);
+
+    // Extrae el valor de resultadoRiego
+    necesitaRegar = respDoc["readings"]["resultadoRiego"].as<bool>();
+
+    // Imprime el estado de riego
+    Serial.print("Necesita regar: ");
+    Serial.println(necesitaRegar ? "Si" : "No");
+    
   } else {
-    // Si la solicitud falló, imprime el error
     Serial.println("Error en la solicitud: " + http.errorToString(httpCode));
   }
 
   http.end();
+
+  // Retorna el estado de riego
+  return necesitaRegar;
 }
 
 std::pair<String, int> registerDevice(WiFiClient& client, const char* servidor, const char* fechaHora) {
@@ -198,11 +223,13 @@ void setup() {
   pinMode(rojo, OUTPUT);
   pinMode(azul, OUTPUT);
   pinMode(verde, OUTPUT);
+  pinMode(riego, OUTPUT);
 
   // Estable el estado inicial de los leds
   digitalWrite(rojo, HIGH);
   digitalWrite(azul, LOW);
   digitalWrite(verde, LOW);
+  digitalWrite(riego, LOW);
 
 
   timeClient.begin();
@@ -221,35 +248,31 @@ void loop() {
     Serial.println("Connecting to WiFi...");
     // Intenta conectarse a la red WiFi
     WiFi.begin(ssid, password);
-  } else {
-    // Si está conectado, apaga el LED rojo y enciende el azul
-    digitalWrite(rojo, LOW);
-    digitalWrite(azul, HIGH);
-    // Crea un objeto HTTPClient para hacer una solicitud HTTP
-   // HTTPClient http; 
-    // Inicia una conexión al servidor 
-    http.begin(client, servidor);
-    // Realiza una solicitud GET y guarda el código de estado HTTP
-    int httpCode = http.GET();
-    // Cierra la conexión al servidor
-    http.end();
-    // Verifica si la solicitud fue exitosa
-    if (httpCode == 200) {
-      // Si fue exitosa, apaga el LED azul y enciende el verde
-      digitalWrite(azul, LOW);
-      digitalWrite(verde, HIGH);
-      Serial.println("Connected to server");
     } else {
-      // Si no fue exitosa, enciende el LED azul y apaga el verde
+      // Si está conectado, apaga el LED rojo y enciende el azul
+      digitalWrite(rojo, LOW);
       digitalWrite(azul, HIGH);
-      digitalWrite(verde, LOW);
-      Serial.println("Failed to connect to server");
-    }
+      // Crea un objeto HTTPClient para hacer una solicitud HTTP
+    // HTTPClient http; 
+      // Inicia una conexión al servidor 
+      http.begin(client, servidor);
+      // Realiza una solicitud GET y guarda el código de estado HTTP
+      int httpCode = http.GET();
+      // Cierra la conexión al servidor
+      http.end();
+      // Verifica si la solicitud fue exitosa
+      if (httpCode == 200) {
+        // Si fue exitosa, apaga el LED azul y enciende el verde
+        digitalWrite(azul, LOW);
+        digitalWrite(verde, HIGH);
+        Serial.println("Connected to server");
+      } else {
+        // Si no fue exitosa, enciende el LED azul y apaga el verde
+        digitalWrite(azul, HIGH);
+        digitalWrite(verde, LOW);
+        Serial.println("Failed to connect to server");
+      }
   }
-  ///Enviar datos en este if, convertirlo en funcion
-
-  //String fechaHora = timeClient.getFormattedDate() + " " + timeClient.getFormattedTime();
-  //Serial.println(fechaHora);
 
   timeClient.update();
   time_t rawtime = timeClient.getEpochTime();
@@ -263,12 +286,13 @@ void loop() {
   String token = result.first;
   int idDispositivo = result.second;
 
-  Serial.println("Token: " + token);
-  Serial.println("ID del dispositivo: " + String(idDispositivo));
+  //Serial.println("Token: " + token);
+  //Serial.println("ID del dispositivo: " + String(idDispositivo));
 
   // Lee la humedad y la temperatura del primer sensor DHT
-  hume = dht.readHumidity();
-  temp = dht.readTemperature();
+  HumedadAire = dht.readHumidity();
+
+  Temperatura = dht.readTemperature();
 
 
 
@@ -280,42 +304,27 @@ void loop() {
   Serial.print("Medición sensores tierra: ");
 
   // Lee la temperatura del sensor Dallas
-  float raw_temperatureC = sensors.getTempCByIndex(0);
+  float TemperaturaTierra = sensors.getTempCByIndex(0);
   // Lee la humedad del suelo del sensor analógico
   MoistureLevel = analogRead(sensorPin);  
   //Serial.print(MoistureLevel);
   // Mapea el nivel de humedad del suelo a un porcentaje
-  SoilMoisturePercentage = map(MoistureLevel, medicionSeco, medicionAgua, 0, 100);
+  HumedadTierra = map(MoistureLevel, medicionSeco, medicionAgua, 0, 100);
   // Verifica si el porcentaje de humedad del suelo es 100, 0 o algo intermedio
-  if (SoilMoisturePercentage >= 100){
-    Serial.println("\nTemperatura: " +String(raw_temperatureC)+ "°C Humedad: Maximum - 100 %");
+  if (HumedadTierra >= 100){
+    Serial.println("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: Maximum - 100 %");
+    }
+    else if (HumedadTierra <= 0)
+    {
+      Serial.println("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: Minimum - 0 %");
+    }
+    else if (HumedadTierra > 0 && HumedadTierra < 100)
+    {
+      Serial.print("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: " +String(HumedadTierra));
+      Serial.println("%");
   }
-  else if (SoilMoisturePercentage <= 0)
-  {
-    Serial.println("\nTemperatura: " +String(raw_temperatureC)+ "°C Humedad: Minimum - 0 %");
-  }
-  else if (SoilMoisturePercentage > 0 && SoilMoisturePercentage < 100)
-  {
-    Serial.print("\nTemperatura: " +String(raw_temperatureC)+ "°C Humedad: " +String(SoilMoisturePercentage));
-    Serial.println("%");
-  }
-
-
 
 /*
-  unsigned long currentTime = millis();  // Obtiene el tiempo actual
-  if (currentTime - lastTime >= interval) {  // Comprueba si han pasado 5 segundos
-    lastTime = currentTime;  // Actualiza la última vez que se ejecutó el código
-
-    sendHttpRequest(http, client, token, fechaHora, temp, 1);
-    sendHttpRequest(http, client, token, fechaHora, hume, 2);
-    sendHttpRequest(http, client, token, fechaHora, SoilMoisturePercentage, 3);
-    sendHttpRequest(http, client, token, fechaHora, raw_temperatureC, 4);
-
-    
-  }
-*/
-
   // Crea un JsonArray para almacenar los datos de lectura
   DynamicJsonDocument doc(1024);
   JsonArray readingsData = doc.createNestedArray("readingsData");
@@ -324,38 +333,70 @@ void loop() {
   JsonObject tempAire = readingsData.createNestedObject();
   tempAire["sensorId"] = 1;
   tempAire["dateTime"] = fechaHora;
-  tempAire["value"] = temp;
+  tempAire["value"] = Temperatura;
 
   JsonObject humAire = readingsData.createNestedObject();
   humAire["sensorId"] = 2;
   humAire["dateTime"] = fechaHora;
-  humAire["value"] = hume;
+  humAire["value"] = HumedadAire;
 
   JsonObject humTierra = readingsData.createNestedObject();
   humTierra["sensorId"] = 3;
   humTierra["dateTime"] = fechaHora;
-  humTierra["value"] = SoilMoisturePercentage;
+  humTierra["value"] = HumedadTierra;
 
   JsonObject tempTierra = readingsData.createNestedObject();
   tempTierra["sensorId"] = 4;
   tempTierra["dateTime"] = fechaHora;
-  tempTierra["value"] = raw_temperatureC;
+  tempTierra["value"] = TemperaturaTierra;
+  
+*/
+  
+  
+  DynamicJsonDocument doc(1024);
+  JsonArray readingsData = doc.createNestedArray("readingsData");
+
+  String respuesta = obtenerDatosSensor(idDispositivo, token);
+  DynamicJsonDocument sensorInfo(1024);
+  deserializeJson(sensorInfo, respuesta);
+
+  for (JsonObject elem : sensorInfo.as<JsonArray>()) {
+    JsonObject sensorData = readingsData.createNestedObject();
+    sensorData["sensorId"] = elem["idSensor"];
+    //sensorData["dateTime"] = fechaHora;
+    sensorData["tipoSensor"] =  elem["tipoSensor"];
+
+    String tipoSensor = elem["tipoSensor"].as<String>();
+    if (tipoSensor == "Temperatura") {
+      sensorData["value"] = Temperatura;
+    } else if (tipoSensor == "HumedadAire") {
+      sensorData["value"] = HumedadAire;
+    } else if (tipoSensor == "HumedadTierra") {
+      // Suponiendo que tienes una función para leer la humedad de la tierra
+      sensorData["value"] = HumedadTierra;
+    } else if (tipoSensor == "TemperaturaTierra") {
+      // Suponiendo que tienes una función para leer la temperatura de la tierra
+      sensorData["value"] = TemperaturaTierra;
+    }
+  }
 
   JsonObject arduinoData = doc.createNestedObject("arduinoData");
   arduinoData["idDispositivo"] = idDispositivo; // Reemplaza con la variable correspondiente si es necesario
   arduinoData["ultimaIP"] = WiFi.localIP().toString(); // Reemplaza con la variable correspondiente si es necesario
   arduinoData["fechaUltimaComunicacion"] = fechaHora; // Reemplaza con la variable correspondiente si es necesario
 
-  // Envía la solicitud HTTP con los datos de lectura
-  //sendHttpRequest(http, client, token, fechaHora, readingsData);
+  //String respuesta = obtenerDatosSensor(idDispositivo, token);
 
-
-
-  // Imprimir el documento JSON en la consola serial
-  serializeJsonPretty(doc, Serial);
+  //Serial.print(respuesta);
+  bool necesitaRegar = sendSensorData(http, client, token, doc);
+  if (necesitaRegar) {
+  digitalWrite(riego, HIGH); // Enciende el LED
+  Serial.println("Riego necesario, LED encendido.");
+  } else {
+    digitalWrite(riego, LOW); // Apaga el LED
+    Serial.println("Riego no necesario, LED apagado.");
+  }
   Serial.println();
-  // Llamar a sendSensorData
-  sendSensorData(http, client, token, doc);
   // Espera (x*1000) segundos antes de la próxima iteración
-  delay(10000);
+  delay(15000);
 }

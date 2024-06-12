@@ -161,7 +161,7 @@ router.delete('/arduino-devices/:id', async (req, res) => {
 });
 
 
-router.put('/arduino-devices/:id', async (req, res) => { //¿quitar id de endpoint?
+router.put('/arduino-devices/:id', async (req, res) => { 
   try {
     const updatedDevice = await arduinoController.updateArduino(req.params.id, req.body);
     res.json(updatedDevice);
@@ -174,6 +174,7 @@ router.post('/sensor/readings', async (req, res) => {
   try {
     const readingsData = req.body.readingsData;
     const arduinoData = req.body.arduinoData;
+    console.log('Received readings:', req.body);
     const readings = await arduinoController.receiveSensorReadings(readingsData, arduinoData);
     res.status(201).json({ message: 'Readings received and Arduino data updated.', readings });
   } catch (err) {
@@ -190,5 +191,39 @@ router.get('/sensor/readings', async (req, res) => {
   }
 });
 
+
+router.put('/regado-manual/:id', async (req, res) => {
+  try {
+    const { id } = req.params; // Extrae el id de los parámetros de la URL
+    const { valor } = req.body; // Extrae el valor del cuerpo de la solicitud
+
+    // Verifica que el valor no sea undefined
+    if (valor === undefined) {
+      return res.status(400).json({ message: 'La solicitud debe contener un valor.' });
+    }
+
+    // Llama a la función guardarValor
+    const resultado = arduinoController.guardarValor(id, valor);
+
+    if (resultado) {
+      res.json({ message: `Valor ${valor} actualizado para el id ${id}.` });
+    } else {
+      // En este caso, siempre se devuelve true, pero puedes manejar errores si modificas la función
+      res.status(500).json({ message: 'Ocurrió un error al intentar guardar el valor.' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/cancelar-regado/:deviceId', async (req, res) => {
+  try {
+      const { deviceId } = req.params; // Obtiene el deviceId de los parámetros de la URL
+      await arduinoController.cancelarRegadoManual(deviceId);
+      res.json({ message: `Regado manual cancelado para el dispositivo con ID ${deviceId}` });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

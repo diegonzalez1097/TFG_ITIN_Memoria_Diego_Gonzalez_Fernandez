@@ -12,6 +12,8 @@ const cron = require('node-cron');
 
 let inMemoryReadings = [];
 
+// Inicializar el Map globalmente
+let necesitaRegarMap = new Map();
 
 /**
  * Obtiene todos los dispositivos Arduino.
@@ -33,6 +35,12 @@ exports.getSensorsByArduinoId = (arduinoId) => {
     return arduinoAccess.getSensorsByArduinoId(arduinoId);
 };
 
+
+exports.guardarValor = (id, valor) => {
+    necesitaRegarMap.set(id, valor);
+    console.log(`Valor ${valor} actualizado para el id ${id}.`);
+    return true; // Indica éxito en la actualización o inserción
+};
 
 /**
  * Crea un dispositivo Arduino.
@@ -154,18 +162,70 @@ exports.insertSensorReadings = async (readingsData) => {
     return readings;
 };
 
+function necesitaRegar(deviceId) {
+    console.log('Llamando a necesitaRegar con deviceId:', deviceId);
+    necesitaRegarMap.forEach((value, key) => {
+        console.log(`Key: ${key}, Value: ${value}`);
+    });
+
+    console.log(`Verificando deviceId: '${deviceId}'`); // Asegúrate de que deviceId tiene el valor esperado
+    console.log(`Contenido de necesitaRegarMap:`, necesitaRegarMap); // Verifica el contenido de necesitaRegarMap
+    
+    riegaIdArd = deviceId.toString();
+
+    if (necesitaRegarMap.has(riegaIdArd)) {
+        console.log(`El deviceId ${riegaIdArd} está presente en necesitaRegarMap.`);
+        return necesitaRegarMap.get(riegaIdArd);
+    } else {
+        console.log(`El deviceId ${riegaIdArd} NO está presente en necesitaRegarMap.`);
+    }
+
+    // Definir umbrales
+    const umbralHumedadTierra = 20;
+    const umbralHumedadAire = 40;
+    const umbralTemperatura = 18;
+
+    // Filtrar primero por deviceId
+    const lecturasDelDispositivo = inMemoryReadings.filter(lectura => lectura.deviceId === deviceId);
+    //console.log('Lecturas encontradas para el dispositivo:', lecturasDelDispositivo.length);
+
+    // Filtrar para obtener la última lectura de cada tipo de sensor relevante
+    const ultimaTemperatura = lecturasDelDispositivo.filter(lectura => lectura.tipoSensor === 'Temperatura').pop()?.value;
+    const ultimaHumedadAire = lecturasDelDispositivo.filter(lectura => lectura.tipoSensor === 'HumedadAire').pop()?.value;
+    const ultimaHumedadTierra = lecturasDelDispositivo.filter(lectura => lectura.tipoSensor === 'HumedadTierra').pop()?.value;
+    const ultimaTemperaturaTierra = lecturasDelDispositivo.filter(lectura => lectura.tipoSensor === 'TemperaturaTierra').pop()?.value;
+
+    console.log('Lecturas del dispositivo ' + deviceId + ':', ultimaTemperatura, ultimaHumedadAire, ultimaHumedadTierra, ultimaTemperaturaTierra);
+
+    // Verificar si alguna de las lecturas no está disponible
+    if (!ultimaTemperatura || !ultimaHumedadAire || !ultimaHumedadTierra || !ultimaTemperaturaTierra) {
+        console.log("No hay suficientes lecturas disponibles para el dispositivo " + deviceId);
+        return false;
+    }
+
+    // Verificar condiciones para el riego
+    if (ultimaHumedadTierra < umbralHumedadTierra || 
+        ultimaHumedadAire < umbralHumedadAire || 
+        ultimaTemperaturaTierra < umbralTemperatura) {
+        return true; // Necesita riego
+    }
+
+    return false; // No necesita riego
+}
+
 
 /**
  * Inserta nuevas lecturas de sensor en el array en memoria.
  * @param {Array} readingsData - Un array de objetos de datos de lectura del sensor.
  */
 exports.receiveSensorReadings = (readingsData, arduinoData) => {
-    // Extrae el idDispositivo de arduinoData
-    const { idDispositivo, ...updateData } = arduinoData;
-
+    // Extrae el idDispositivo y fechaUltimaComunicacion de arduinoData
+    const { idDispositivo, fechaUltimaComunicacion, ...updateData } = arduinoData;
+    //console.log('Adding data to inMemoryReadings:', readingsData);
     for (let readingData of readingsData) {
-        // Agrega el idDispositivo a readingData
+        // Agrega el idDispositivo y fechaUltimaComunicacion (como dateTime) a readingData
         readingData.deviceId = idDispositivo;
+        readingData.dateTime = fechaUltimaComunicacion;
     
         // Verifica si la lectura ya existe en inMemoryReadings
         const existingReadingIndex = inMemoryReadings.findIndex(reading => 
@@ -185,7 +245,10 @@ exports.receiveSensorReadings = (readingsData, arduinoData) => {
     exports.updateArduino(idDispositivo, updateData);
     console.log('Adding data to inMemoryReadings:', arduinoData);
     console.log(inMemoryReadings);
-    return inMemoryReadings;
+    // Al final de la función receiveSensorReadings, captura el resultado de necesitaRegar()
+    const resultadoRiego = necesitaRegar(idDispositivo);
+    console.log('¿Necesita regar?:', resultadoRiego);
+    return { inMemoryReadings, resultadoRiego };
 };
 
 /**
@@ -201,6 +264,16 @@ cron.schedule('0 * * * *', async () => {
     inMemoryReadings = [];
     console.log('Cron job finished. inMemoryReadings should be empty:', inMemoryReadings);
 });
+
+
+exports.cancelarRegadoManual = function(deviceId) {
+    deviceId = deviceId.toString(); // Asegurar que el deviceId sea una cadena
+    if (necesitaRegarMap.delete(deviceId)) {
+        console.log(`El dispositivo con ID ${deviceId} ha sido eliminado de necesitaRegarMap.`);
+    } else {
+        console.log(`No se encontró el dispositivo con ID ${deviceId} en necesitaRegarMap.`);
+    }
+};
 
 /**
  * Devuelve el array en memoria de lecturas del sensor.
