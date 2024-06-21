@@ -52,7 +52,7 @@ String token;
 HTTPClient http;
 
 // Define la dirección base del servidor
-const char* servidor = "http://192.168.1.139:3000";
+const char* servidor = "http://192.168.1.135:3000";
 
 int idDispositivo = -1;  // Inicializa con un valor por defecto
 
@@ -73,7 +73,7 @@ String obtenerDatosSensor(int idArduino, const String &token) {
   if (httpCode > 0) {
     // Obtiene la respuesta del servidor
     String payload = http.getString();
-    Serial.println(payload); // Imprime la respuesta original
+    //Serial.println(payload); // Imprime la respuesta original
 
     // Parsea la respuesta JSON
     DynamicJsonDocument doc(1024);
@@ -93,7 +93,7 @@ String obtenerDatosSensor(int idArduino, const String &token) {
     // Serializa el JSON filtrado a String
     String filteredPayload;
     serializeJson(filteredSensors, filteredPayload);
-    Serial.println(filteredPayload); // Imprime el JSON filtrado
+    //Serial.println(filteredPayload); // Imprime el JSON filtrado
 
     http.end(); // Cierra la conexión
     return filteredPayload; // Devuelve el JSON filtrado
@@ -125,7 +125,7 @@ bool sendSensorData(HTTPClient &http, WiFiClient &client, const String &token, D
 
   if (httpCode > 0) {
     String response = http.getString();
-    Serial.println(response);
+    //Serial.println(response);
 
     // Deserializa la respuesta JSON
     DynamicJsonDocument respDoc(1024);
@@ -150,7 +150,8 @@ bool sendSensorData(HTTPClient &http, WiFiClient &client, const String &token, D
 
 std::pair<String, int> registerDevice(WiFiClient& client, const char* servidor, const char* fechaHora) {
   HTTPClient http;
-
+  Serial.print("....................");
+  Serial.print(fechaHora);
   // Inicia una conexión al servidor
   http.begin(client, (String(servidor) + "/arduino/register").c_str());
 
@@ -169,6 +170,7 @@ std::pair<String, int> registerDevice(WiFiClient& client, const char* servidor, 
   // Convierte el objeto JSON a una cadena
   String deviceData;
   serializeJson(doc, deviceData);
+  
 
   // Configura los encabezados de la solicitud
   http.addHeader("Content-Type", "application/json");
@@ -301,7 +303,7 @@ void loop() {
   // Lee la temperatura del sensor Dallas
   float temperatureC = sensors.getTempCByIndex(0);
 
-  Serial.print("Medición sensores tierra: ");
+  //Serial.print("Medición sensores tierra: ");
 
   // Lee la temperatura del sensor Dallas
   float TemperaturaTierra = sensors.getTempCByIndex(0);
@@ -312,16 +314,16 @@ void loop() {
   HumedadTierra = map(MoistureLevel, medicionSeco, medicionAgua, 0, 100);
   // Verifica si el porcentaje de humedad del suelo es 100, 0 o algo intermedio
   if (HumedadTierra >= 100){
-    Serial.println("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: Maximum - 100 %");
+    //Serial.println("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: Maximum - 100 %");
     }
     else if (HumedadTierra <= 0)
     {
-      Serial.println("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: Minimum - 0 %");
+      //Serial.println("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: Minimum - 0 %");
     }
     else if (HumedadTierra > 0 && HumedadTierra < 100)
     {
-      Serial.print("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: " +String(HumedadTierra));
-      Serial.println("%");
+      //Serial.print("\nTemperatura: " +String(TemperaturaTierra)+ "°C Humedad: " +String(HumedadTierra));
+      //Serial.println("%");
   }
 
 /*

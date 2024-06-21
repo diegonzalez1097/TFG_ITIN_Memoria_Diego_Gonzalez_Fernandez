@@ -4,10 +4,17 @@ import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 
+import { useNavigate } from "react-router-dom"; 
+
+
+
 const Login = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
+  const navigate = useNavigate(); // Use useNavigate hook
 
-  const handleFormSubmit = async (values) => { // Marcar esta función como async
+
+  const handleFormSubmit = async (values) => {
+
     try {
       const response = await fetch('http://localhost:3000/login/', {
         method: 'POST',
@@ -19,24 +26,28 @@ const Login = () => {
           password: values.password,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Something went wrong');
       }
-
+  
       const data = await response.json();
-      console.log('Success:', data);
-      alert('User created successfully: ' + JSON.stringify(data));
+      localStorage.setItem('authToken', data.token);
+      localStorage.setItem('userId', data.idUsuario); // Guardar el ID del usuario
 
+      // Paso 3: Redireccionar después del éxito
+      navigate('/contacts'); // Use navigate to redirect to the contacts page
+      alert('Login exitoso. Token: ' + localStorage.getItem('authToken') + ', ID del Usuario: ' + localStorage.getItem('userId'));
+      
     } catch (error) {
       console.error('Error:', error);
-      alert('Error creating user: ' + error.message);
     }
   };
 
+
   return (
     <Box m="20px">
-      <Header title="CREATE USER" subtitle="Create a New User Profile" />
+      <Header title="LOGIN" subtitle="Inicia sesion" />
 
       <Formik
         onSubmit={handleFormSubmit}
@@ -89,7 +100,7 @@ const Login = () => {
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button type="submit" color="secondary" variant="contained">
-                Create New User
+                Login
               </Button>
             </Box>
           </form>

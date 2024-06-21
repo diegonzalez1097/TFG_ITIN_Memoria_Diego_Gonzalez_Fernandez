@@ -216,6 +216,25 @@ exports.updateArduino = (idDispositivo, updateData) => {
   });
 };
 
+/**
+ * Actualiza la última IP y fecha de última comunicación de un dispositivo Arduino en la base de datos basándose en su dirección MAC.
+ * @param {string} macDispositivo - La dirección MAC del dispositivo Arduino.
+ * @param {object} updateData - Un objeto con los datos a actualizar.
+ * @returns {Promise} Una promesa que se resuelve cuando los datos se actualizan con éxito.
+ * @throws {Error} Si hay un error al actualizar los datos.
+ */
+exports.updateArduinoByMac = async (macDispositivo, updateData) => {
+  try {
+    const result = await connection.query(
+      `UPDATE dispositivos_arduino SET ultimaIP = ?, fechaUltimaComunicacion = ? WHERE mac = ?`,
+      [updateData.ultimaIP, updateData.fechaUltimaComunicacion, macDispositivo]
+    );
+    // Ajusta esta línea según el formato real de la respuesta
+    return result[0]; // Suponiendo que result[0] contiene el resultado esperado
+  } catch (error) {
+    throw new Error(`Error al actualizar el dispositivo Arduino: ${error.message}`);
+  }
+};
 
 /**
  * Inserta lecturas de sensor en la base de datos.

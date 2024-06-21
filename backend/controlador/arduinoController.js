@@ -106,7 +106,13 @@ exports.registroArduino = async (deviceData) => {
     const { userId, name, location, ultimaIP, fechaUltimaComunicacion, gpsCoordinates, mac } = deviceData;
     let arduino = await arduinoAccess.getArduinosByMac(mac);
 
-    if (!arduino || arduino.length === 0) {
+    if (arduino && arduino.length > 0) {
+        // El Arduino ya existe, actualiza la última IP y fecha de última comunicación utilizando la función actualizada
+        await arduinoAccess.updateArduinoByMac(mac, { ultimaIP, fechaUltimaComunicacion });
+        // Recargar el Arduino actualizado
+        arduino = await arduinoAccess.getArduinosByMac(mac);
+    } else {
+        // El Arduino no existe, crea uno nuevo
         arduino = await arduinoAccess.createArduinoDevice(userId, name, location, ultimaIP, fechaUltimaComunicacion, gpsCoordinates, mac);
     }
 
@@ -131,6 +137,25 @@ exports.createSensor = async (sensorData) => {
     let sensor = await arduinoAccess.createSensor(deviceId, sensorType, associatedPins, description);
 
     return sensor;
+};
+/**
+ * Controlador para actualizar la última IP y fecha de última comunicación de un dispositivo Arduino.
+ * @param {Object} req - El objeto de solicitud HTTP.
+ * @param {Object} res - El objeto de respuesta HTTP.
+ */
+exports.actualizarDatosArduino = async (idDispositivo, ultimaIP, fechaUltimaComunicacion) => {
+    try {
+        // Asegúrate de validar los datos aquí (por ejemplo, verificar que idDispositivo no sea nulo, etc.)
+
+        await arduinoData.actualizarUltimaComunicacion(idDispositivo, ultimaIP, fechaUltimaComunicacion);
+
+        // Retorna un mensaje de éxito o simplemente true para indicar que la operación fue exitosa.
+        return 'Datos del dispositivo actualizados correctamente.';
+    } catch (error) {
+        console.error('Error al actualizar datos del dispositivo:', error);
+        // Lanza una excepción o retorna false para indicar que la operación falló.
+        throw new Error('Error al actualizar los datos del dispositivo.');
+    }
 };
 
 /**
