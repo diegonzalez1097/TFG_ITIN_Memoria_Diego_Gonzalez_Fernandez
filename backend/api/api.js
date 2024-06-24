@@ -191,6 +191,20 @@ router.get('/sensor/readings', async (req, res) => {
   }
 });
 
+router.get('/sensor/readings/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const readings = await arduinoController.getSensorDetailsByDeviceId(id);
+    if (readings.length > 0) {
+      res.status(200).json({ message: 'Lecturas obtenidas con éxito.', readings });
+    } else {
+      res.status(404).json({ message: 'No se encontraron lecturas para el ID proporcionado.' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 
 router.put('/regado-manual/:id', async (req, res) => {
   try {
@@ -223,6 +237,22 @@ router.post('/cancelar-regado/:deviceId', async (req, res) => {
       res.json({ message: `Regado manual cancelado para el dispositivo con ID ${deviceId}` });
   } catch (error) {
       res.status(500).json({ error: error.message });
+  }
+});
+
+
+router.get('/lecturas/:idDispositivo/:fechaInicio/:fechaFin', async (req, res) => {
+  try {
+    const { idDispositivo, fechaInicio, fechaFin } = req.params; // Obtiene el idDispositivo y las fechas de los parámetros de la URL
+    const lecturas = await arduinoController.recuperarLecturasPorFechas(idDispositivo, fechaInicio, fechaFin);
+    if (lecturas.length > 0) {
+      res.json({ lecturas });
+    } else {
+      // En este caso, se devuelve un mensaje indicando que no se encontraron lecturas
+      res.status(404).json({ message: 'No se encontraron lecturas para el dispositivo y rango de fechas proporcionado.' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

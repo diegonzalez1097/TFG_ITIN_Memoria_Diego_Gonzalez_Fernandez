@@ -160,8 +160,8 @@ std::pair<String, int> registerDevice(WiFiClient& client, const char* servidor, 
   
   doc["name"] = "ADR1";
   doc["location"] = "Aviles";
-  doc["lastIP"] = WiFi.localIP().toString();
-  doc["lastCommunicationDate"] = fechaHora;
+  doc["ultimaIP"] = WiFi.localIP().toString();
+  doc["fechaUltimaComunicacion"] = fechaHora;
   JsonObject gpsCoordinates = doc.createNestedObject("gpsCoordinates");
   gpsCoordinates["x"] = 43.550299; // reemplaza con la coordenada x de tu dispositivo
   gpsCoordinates["y"] = -5.922112; // reemplaza con la coordenada y de tu dispositivo
@@ -170,7 +170,7 @@ std::pair<String, int> registerDevice(WiFiClient& client, const char* servidor, 
   // Convierte el objeto JSON a una cadena
   String deviceData;
   serializeJson(doc, deviceData);
-  
+  serializeJsonPretty(doc, Serial);
 
   // Configura los encabezados de la solicitud
   http.addHeader("Content-Type", "application/json");

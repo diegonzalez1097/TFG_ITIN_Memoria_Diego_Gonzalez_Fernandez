@@ -256,3 +256,29 @@ exports.insertSensorReadings = (readings) => {
     });
   });
 };
+
+/**
+ * Recupera lecturas de sensor entre dos fechas, ignorando la hora.
+ * @param {string} fechaInicio - La fecha de inicio del rango en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin del rango en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas.
+ * @throws {Error} Si hay un error al recuperar las lecturas.
+ */
+exports.getSensorReadingsBetweenDates = (idDispositivo, fechaInicio, fechaFin) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT ls.* 
+      FROM lecturas_sensores ls
+      JOIN dispositivos_sensores ds ON ls.idSensor = ds.idSensor
+      WHERE ds.idDispositivo = ? AND DATE(ls.fechaHora) BETWEEN ? AND ?
+      AND ds.tipoSensor IN ('TemperaturaTierra')
+    `;
+    connection.query(query, [idDispositivo, fechaInicio, fechaFin], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};

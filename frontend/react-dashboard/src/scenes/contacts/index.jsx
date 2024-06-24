@@ -4,6 +4,8 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Asegúrate de importar useNavigate
+
 
 
 function formatearFecha(fechaISO) {
@@ -15,12 +17,14 @@ function formatearFecha(fechaISO) {
   const minutos = fecha.getUTCMinutes().toString().padStart(2, '0');
   const segundos = fecha.getUTCSeconds().toString().padStart(2, '0');
   return `${dia}/${mes}/${año} ${horas}:${minutos}:${segundos}`;
+
 }
 
 const Contacts = () => {
   const [arduinos, setArduinos] = useState([]); 
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const navigate = useNavigate(); // Utiliza useNavigate para obtener la función de navegación
 
   useEffect(() => { 
     const fetchArduinos = async () => {
@@ -132,7 +136,12 @@ const Contacts = () => {
           columns={columns}
           components={{ Toolbar: GridToolbar }}
           getRowId={(row) => row.idDispositivo} // Utiliza idDispositivo como id único para cada fila
-
+          onRowClick={(params) => {
+            localStorage.setItem('idDispositivo', params.row.idDispositivo);
+            const idDispositivo = localStorage.getItem('idDispositivo');
+            alert(`Seleccionaste el dispositivo con id: ${idDispositivo}`);
+            navigate('/dashboard');
+          }}
         />
       </Box>
     </Box>

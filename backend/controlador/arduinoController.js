@@ -277,7 +277,7 @@ exports.receiveSensorReadings = (readingsData, arduinoData) => {
 };
 
 /**
- * Esta función se ejecuta cada minuto (según lo programado por cron.schedule).
+ * Esta función se ejecuta x
  * Recorre el array `inMemoryReadings` y guarda cada lectura en la base de datos.
  * Después de guardar todas las lecturas, vacía el array `inMemoryReadings`.
  */
@@ -306,4 +306,32 @@ exports.cancelarRegadoManual = function(deviceId) {
  */
 exports.getSensorReadings = () => {
     return inMemoryReadings;
+};
+
+/**
+ * Devuelve el tipoSensor y value de las lecturas asociadas a un deviceId específico.
+ * @param {number} deviceId - El ID del dispositivo del cual obtener las lecturas.
+ * @returns {Array} Un array de objetos con el tipoSensor y value de cada lectura asociada al deviceId.
+ */
+exports.getSensorDetailsByDeviceId = (deviceId) => {
+    return inMemoryReadings
+        .filter(reading => reading.deviceId === deviceId)
+        .map(reading => ({
+            tipoSensor: reading.tipoSensor,
+            value: reading.value
+        }));
+};
+/**
+ * Recupera lecturas de sensor entre dos fechas desde la capa de datos.
+ * @param {string} fechaInicio - La fecha de inicio en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas o un error.
+ */
+exports.recuperarLecturasPorFechas = async (idDispositivo, fechaInicio, fechaFin) => {
+    const lecturas = await arduinoAccess.getSensorReadingsBetweenDates(idDispositivo, fechaInicio, fechaFin).catch(error => {
+        console.error('Error al recuperar lecturas:', error);
+        return []; // Retorna un array vacío o cualquier otro valor que indique un error de manera segura.
+    });
+    console.log('Lecturas recuperadas:', lecturas);
+    return lecturas;
 };
