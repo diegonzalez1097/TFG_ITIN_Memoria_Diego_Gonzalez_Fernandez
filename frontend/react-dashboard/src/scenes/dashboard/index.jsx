@@ -6,6 +6,7 @@ import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
 import Header from "../../components/Header";
 import LineChart from "../../components/LineChart";
 import LineChartSensor from "../../components/LineChartSensor";
+import Chart from "../../components/chart";
 import GeographyChart from "../../components/GeographyChart";
 import BarChart from "../../components/BarChart";
 import SensorBox from "../../components/SensorBox";
@@ -37,7 +38,7 @@ const sensorUnits = {
   HumedadAire: '%',
   HumedadTierra: '%',
   Temperatura: 'Cº',
-  TemperaturaAire: 'Cº',
+  TemperaturaTierra: 'Cº',
   
 };
   
@@ -122,39 +123,35 @@ const sensorUnits = {
         {/* ROW 2 */}
         <Box
           gridColumn="span 12"
-          gridRow="span 2"
+          gridRow="span 3"
           backgroundColor={colors.primary[400]}
 
         >
           <Box
-            mt="25px"
+            mt="10px" // Margen superior ajustado
+            mb="20px" // Añadiendo margen inferior
             p="0 30px"
             display="flex "
             justifyContent="space-between"
             alignItems="center"
           >
             <Box>
-              <Typography
-                variant="h5"
-                fontWeight="600"
-                color={colors.grey[100]}
-              >
-                Grafica de mediciones de temperatura
-              </Typography>
+            <Typography
+              variant="h5"
+              fontWeight="600"
+              color={colors.greenAccent[600]} // Establece el color del texto
+              style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
+            >
+              Gráfica de mediciones de temperatura
+            </Typography>
 
                 
 
             </Box>
-            <Box>
-              <IconButton>
-                <DownloadOutlinedIcon
-                  sx={{ fontSize: "26px", color: colors.greenAccent[500] }}
-                />
-              </IconButton>
-            </Box>
+
           </Box>
           <Box height="250px" m="-20px 0 0 0">
-            <LineChartSensor isDashboard={true}/>
+            <Chart isDashboard={true}/>
           </Box>
         </Box>
         
