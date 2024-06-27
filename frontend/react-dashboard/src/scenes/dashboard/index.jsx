@@ -18,6 +18,13 @@ import WaterIcon from '@mui/icons-material/Water';
 import AirIcon from '@mui/icons-material/Air';
 
 
+// Función para convertir camelCase a texto con espacios
+function camelCaseToSpaces(text) {
+  // Inserta un espacio antes de las mayúsculas y elimina el espacio inicial si existe
+  const result = text.replace(/([A-Z])/g, " $1").trim();
+  // Opcional: capitaliza la primera letra de cada palabra
+  return result.charAt(0).toUpperCase() + result.slice(1);
+}
 
 const Dashboard = () => {
   const theme = useTheme();
@@ -76,20 +83,7 @@ const sensorUnits = {
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Header title="DASHBOARD" subtitle="Bienvenido a Cropsense" />
 
-        <Box>
-          <Button
-            sx={{
-              backgroundColor: colors.blueAccent[700],
-              color: colors.grey[100],
-              fontSize: "14px",
-              fontWeight: "bold",
-              padding: "10px 20px",
-            }}
-          >
-            <DownloadOutlinedIcon sx={{ mr: "10px" }} />
-            Download Reports
-          </Button>
-        </Box>
+
       </Box>
 
       {/* GRID & CHARTS */}
@@ -110,7 +104,7 @@ const sensorUnits = {
             justifyContent="center"
           >
             <SensorBox
-              title={sensor.tipoSensor} 
+              title={camelCaseToSpaces(sensor.tipoSensor)} 
               subtitle={`${sensor.value} ${sensorUnits[sensor.tipoSensor] || ''}`} 
               icon={
                 sensorIcons[sensor.tipoSensor]
@@ -142,7 +136,7 @@ const sensorUnits = {
               color={colors.greenAccent[600]} // Establece el color del texto
               style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
             >
-              Gráfica de mediciones de temperatura
+              Gráfica de mediciones de temperatura de los ultimos 3 dias
             </Typography>
 
                 

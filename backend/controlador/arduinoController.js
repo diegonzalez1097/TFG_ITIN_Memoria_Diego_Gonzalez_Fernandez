@@ -5,6 +5,9 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
+const fs = require('fs');
+const path = './necesitaRegarMap.json';
+
 
 const arduinoAccess = require('../data/arduinoData');
 
@@ -14,6 +17,49 @@ let inMemoryReadings = [];
 
 // Inicializar el Map globalmente
 let necesitaRegarMap = new Map();
+
+// Función para guardar el Map en un archivo
+function guardarMap(map) {
+    const objArray = Array.from(map.entries());
+    fs.writeFileSync(path, JSON.stringify(objArray), (err) => {
+      if (err) throw err;
+      console.log('Map guardado correctamente.');
+    });
+  }
+  
+// Cargar el Map al iniciar
+function cargarMap() {
+    if (fs.existsSync(path)) {
+      try {
+        const fileContent = fs.readFileSync(path);
+        // Verificar si el contenido del archivo está vacío
+        if (fileContent.length === 0) {
+          console.log('El archivo está vacío. Inicializando Map vacío.');
+          necesitaRegarMap = new Map();
+        } else {
+          const objArray = JSON.parse(fileContent);
+          necesitaRegarMap = new Map(objArray);
+        }
+      } catch (error) {
+        console.error('Error al cargar el Map:', error);
+        necesitaRegarMap = new Map(); // Inicializar con un Map vacío en caso de error
+      }
+    }
+  }
+  
+  // Llamar a cargarMap al iniciar el servidor
+  cargarMap();
+  
+  // Manejar cierre suave
+  function manejarCierre() {
+    guardarMap(necesitaRegarMap);
+    console.log('Servidor cerrando, Map guardado.');
+    process.exit();
+  }
+  
+  // Escuchar eventos de cierre
+  process.on('SIGINT', manejarCierre);
+  process.on('SIGTERM', manejarCierre);
 
 /**
  * Obtiene todos los dispositivos Arduino.

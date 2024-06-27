@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { format, parseISO } from 'date-fns';
+import { parseISO, format, subHours } from 'date-fns';
 import { useTheme } from "@mui/material";
 
 const CustomTooltip = ({ active, payload }) => {
@@ -68,9 +68,10 @@ const CustomLineChart = () => {
         const dataArray = jsonData.lecturas;
   
         const transformedData = dataArray.map(lectura => ({
-          name: format(parseISO(lectura.fechaHora), 'dd/MM/yyyy HH:mm'),
-          Valor: lectura.valor
-        }));
+            name: format(subHours(parseISO(lectura.fechaHora), 2), 'dd/MM/yyyy HH:mm'),
+            Valor: lectura.valor,
+            tipoSensor: lectura.tipoSensor
+          }));
 
         // Ajustar el dominio del eje Y basado en los valores calculados
         const minValue = Math.min(...transformedData.map(item => item.Valor));
@@ -103,10 +104,11 @@ const CustomLineChart = () => {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="name" />
-        <YAxis domain={yAxisDomain} />
+        <YAxis domain={yAxisDomain} tickFormatter={(value) => Math.round(value)} />
+        
         <Tooltip content={<CustomTooltip />} />
         <Legend />
-        <Line type="monotone" dataKey="Valor" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="Valor"  stroke="#8884d8" activeDot={{ r: 8 }} />
         
       </LineChart>
     </ResponsiveContainer>
