@@ -282,3 +282,83 @@ exports.getSensorReadingsBetweenDates = (idDispositivo, fechaInicio, fechaFin) =
     });
   });
 };
+
+/**
+ * Recupera lecturas de sensores de tipo HumedadTierra entre dos fechas, ignorando la hora.
+ * @param {string} idDispositivo - El ID del dispositivo cuyas lecturas se quieren recuperar.
+ * @param {string} fechaInicio - La fecha de inicio del rango en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin del rango en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas.
+ * @throws {Error} Si hay un error al recuperar las lecturas.
+ */
+exports.getTHumidityReadingsBetweenDates = (idDispositivo, fechaInicio, fechaFin) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT ls.* 
+      FROM lecturas_sensores ls
+      JOIN dispositivos_sensores ds ON ls.idSensor = ds.idSensor
+      WHERE ds.idDispositivo = ? AND DATE(ls.fechaHora) BETWEEN ? AND ?
+      AND ds.tipoSensor IN ('HumedadTierra')
+    `;
+    connection.query(query, [idDispositivo, fechaInicio, fechaFin], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+/**
+ * Recupera lecturas de sensores de tipo HumedadAire entre dos fechas, ignorando la hora.
+ * @param {string} idDispositivo - El ID del dispositivo cuyas lecturas se quieren recuperar.
+ * @param {string} fechaInicio - La fecha de inicio del rango en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin del rango en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas.
+ * @throws {Error} Si hay un error al recuperar las lecturas.
+ */
+exports.getAirHumidityReadingsBetweenDates = (idDispositivo, fechaInicio, fechaFin) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT ls.* 
+      FROM lecturas_sensores ls
+      JOIN dispositivos_sensores ds ON ls.idSensor = ds.idSensor
+      WHERE ds.idDispositivo = ? AND DATE(ls.fechaHora) BETWEEN ? AND ?
+      AND ds.tipoSensor IN ('HumedadAire')
+    `;
+    connection.query(query, [idDispositivo, fechaInicio, fechaFin], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};
+
+/**
+ * Recupera lecturas de sensores ignorando la hora, incluyendo el tipo de sensor.
+ * @param {string} idDispositivo - El ID del dispositivo cuyas lecturas se quieren recuperar.
+ * @param {string} fechaInicio - La fecha de inicio del rango en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin del rango en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas y el tipo de sensor.
+ * @throws {Error} Si hay un error al recuperar las lecturas.
+ */
+exports.getAllReadingsBetweenDates = (idDispositivo, fechaInicio, fechaFin) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT ls.*, ds.tipoSensor
+      FROM lecturas_sensores ls
+      JOIN dispositivos_sensores ds ON ls.idSensor = ds.idSensor
+      WHERE ds.idDispositivo = ? AND DATE(ls.fechaHora) BETWEEN ? AND ?
+    `;
+    connection.query(query, [idDispositivo, fechaInicio, fechaFin], (err, results) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(results);
+      }
+    });
+  });
+};

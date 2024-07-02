@@ -53,7 +53,7 @@ const CustomLineChart = () => {
         
         const token = localStorage.getItem('authToken');
         const idDispositivo = localStorage.getItem('idDispositivo');
-        const response = await fetch(`http://localhost:3000/lecturas/temperatura/${idDispositivo}/${startDate}/${endDate}`, {
+        const response = await fetch(`http://localhost:3000/lecturas/humedadTierra/${idDispositivo}/${startDate}/${endDate}`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,

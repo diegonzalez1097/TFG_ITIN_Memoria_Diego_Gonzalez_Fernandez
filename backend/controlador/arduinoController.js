@@ -15,6 +15,11 @@ const cron = require('node-cron');
 
 let inMemoryReadings = [];
 
+// Objeto global para almacenar los resultados de riego por dispositivo
+let resultadoRiegoPorDispositivo = {};
+
+
+/////////// GESTION DE MEMORIA DE REGADO MANUAL
 // Inicializar el Map globalmente
 let necesitaRegarMap = new Map();
 
@@ -50,16 +55,9 @@ function cargarMap() {
   // Llamar a cargarMap al iniciar el servidor
   cargarMap();
   
-  // Manejar cierre suave
-  function manejarCierre() {
-    guardarMap(necesitaRegarMap);
-    console.log('Servidor cerrando, Map guardado.');
-    process.exit();
-  }
-  
-  // Escuchar eventos de cierre
-  process.on('SIGINT', manejarCierre);
-  process.on('SIGTERM', manejarCierre);
+ 
+
+  //////////////
 
 /**
  * Obtiene todos los dispositivos Arduino.
@@ -84,6 +82,7 @@ exports.getSensorsByArduinoId = (arduinoId) => {
 
 exports.guardarValor = (id, valor) => {
     necesitaRegarMap.set(id, valor);
+    guardarMap(necesitaRegarMap);
     console.log(`Valor ${valor} actualizado para el id ${id}.`);
     return true; // Indica éxito en la actualización o inserción
 };
@@ -319,7 +318,26 @@ exports.receiveSensorReadings = (readingsData, arduinoData) => {
     // Al final de la función receiveSensorReadings, captura el resultado de necesitaRegar()
     const resultadoRiego = necesitaRegar(idDispositivo);
     console.log('¿Necesita regar?:', resultadoRiego);
+    // Actualiza el objeto con el resultado de riego para el dispositivo actual
+    resultadoRiegoPorDispositivo[idDispositivo] = resultadoRiego;
     return { inMemoryReadings, resultadoRiego };
+};
+exports.consultarResultadoRiego = function(idDispositivo) {
+    console.log('Llamando a consultarResultadoRiego con idDispositivo:', idDispositivo);
+    if (!necesitaRegarMap) {
+        console.error('necesitaRegarMap no está definido.');
+        return resultadoRiegoPorDispositivo;
+    }
+
+    let idDispositivoStr = idDispositivo.toString();
+
+    if (necesitaRegarMap.has(idDispositivoStr)) {
+        console.log(`El idDispositivo ${idDispositivoStr} está presente en necesitaRegarMap.`);
+        return necesitaRegarMap.get(idDispositivoStr);
+    } else {
+        console.log(`El idDispositivo ${idDispositivoStr} NO está presente en necesitaRegarMap. Retornando resultadoRiegoPorDispositivo.`);
+        return resultadoRiegoPorDispositivo[idDispositivoStr];
+    }
 };
 
 /**
@@ -341,6 +359,9 @@ exports.cancelarRegadoManual = function(deviceId) {
     deviceId = deviceId.toString(); // Asegurar que el deviceId sea una cadena
     if (necesitaRegarMap.delete(deviceId)) {
         console.log(`El dispositivo con ID ${deviceId} ha sido eliminado de necesitaRegarMap.`);
+
+        // Guardar el Map actualizado en el archivo
+        guardarMap(necesitaRegarMap);
     } else {
         console.log(`No se encontró el dispositivo con ID ${deviceId} en necesitaRegarMap.`);
     }
@@ -373,11 +394,74 @@ exports.getSensorDetailsByDeviceId = (deviceId) => {
  * @param {string} fechaFin - La fecha de fin en formato 'YYYY-MM-DD'.
  * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas o un error.
  */
-exports.recuperarLecturasPorFechas = async (idDispositivo, fechaInicio, fechaFin) => {
+exports.recuperarLecturasTempPorFechas = async (idDispositivo, fechaInicio, fechaFin) => {
     const lecturas = await arduinoAccess.getSensorReadingsBetweenDates(idDispositivo, fechaInicio, fechaFin).catch(error => {
         console.error('Error al recuperar lecturas:', error);
         return []; // Retorna un array vacío o cualquier otro valor que indique un error de manera segura.
     });
     console.log('Lecturas recuperadas:', lecturas);
     return lecturas;
+};
+
+/**
+ * Recupera lecturas de sensores de tipo HumedadTierra entre dos fechas desde la capa de datos.
+ * @param {string} idDispositivo - El ID del dispositivo cuyas lecturas se quieren recuperar.
+ * @param {string} fechaInicio - La fecha de inicio en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas o un error.
+ */
+exports.recuperarLecturasHumedadTierraPorFechas = async (idDispositivo, fechaInicio, fechaFin) => {
+    const lecturasHumedad = await arduinoAccess.getTHumidityReadingsBetweenDates(idDispositivo, fechaInicio, fechaFin).catch(error => {
+        console.error('Error al recuperar lecturas de humedad:', error);
+        return []; // Retorna un array vacío o cualquier otro valor que indique un error de manera segura.
+    });
+    console.log('Lecturas de humedad recuperadas:', lecturasHumedad);
+    return lecturasHumedad;
+};
+
+/**
+ * Recupera lecturas de sensores de tipo HumedadAire entre dos fechas desde la capa de datos.
+ * @param {string} idDispositivo - El ID del dispositivo cuyas lecturas se quieren recuperar.
+ * @param {string} fechaInicio - La fecha de inicio en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas o un error.
+ */
+exports.recuperarLecturasHumedadAirePorFechas = async (idDispositivo, fechaInicio, fechaFin) => {
+    const lecturasHumedad = await arduinoAccess.getAirHumidityReadingsBetweenDates(idDispositivo, fechaInicio, fechaFin).catch(error => {
+        console.error('Error al recuperar lecturas de humedad:', error);
+        return []; // Retorna un array vacío o cualquier otro valor que indique un error de manera segura.
+    });
+    console.log('Lecturas de humedad recuperadas:', lecturasHumedad);
+    return lecturasHumedad;
+};
+
+exports.consultaReagadoActivo = (idDispositivo) => {
+    let idDispositivoStr = idDispositivo.toString();
+    if (necesitaRegarMap.has(idDispositivoStr)) {
+        return {
+            presente: true,
+            valor: necesitaRegarMap.get(idDispositivoStr)
+        };
+    } else {
+        return {
+            presente: false,
+            valor: null
+        };
+    }
+};
+
+/**
+ * Recupera lecturas de sensores entre dos fechas desde la capa de datos.
+ * @param {string} idDispositivo - El ID del dispositivo cuyas lecturas se quieren recuperar.
+ * @param {string} fechaInicio - La fecha de inicio en formato 'YYYY-MM-DD'.
+ * @param {string} fechaFin - La fecha de fin en formato 'YYYY-MM-DD'.
+ * @returns {Promise} Una promesa que se resuelve con las lecturas recuperadas o un error.
+ */
+exports.recuperarLecturasPorFechas = async (idDispositivo, fechaInicio, fechaFin) => {
+    const lecturasHumedad = await arduinoAccess.getAllReadingsBetweenDates(idDispositivo, fechaInicio, fechaFin).catch(error => {
+        console.error('Error al recuperar lecturas de humedad:', error);
+        return []; // Retorna un array vacío o cualquier otro valor que indique un error de manera segura.
+    });
+    console.log('Lecturas de humedad recuperadas:', lecturasHumedad);
+    return lecturasHumedad;
 };

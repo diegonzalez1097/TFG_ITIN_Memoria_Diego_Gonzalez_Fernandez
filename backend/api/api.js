@@ -206,6 +206,20 @@ router.get('/sensor/readings/:id', async (req, res) => {
 });
 
 
+router.get('/resultado-riego/:id', async (req, res) => {
+  try {
+    const idDispositivo = parseInt(req.params.id);
+    const resultadoRiego = arduinoController.consultarResultadoRiego(idDispositivo);
+    if (resultadoRiego !== undefined) {
+      res.status(200).json({ message: 'Resultado de riego obtenido con éxito.', resultadoRiego });
+    } else {
+      res.status(404).json({ message: 'No se encontró resultado de riego para el ID proporcionado.' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.put('/regado-manual/:id', async (req, res) => {
   try {
     const { id } = req.params; // Extrae el id de los parámetros de la URL
@@ -216,14 +230,15 @@ router.put('/regado-manual/:id', async (req, res) => {
       return res.status(400).json({ message: 'La solicitud debe contener un valor.' });
     }
 
-    // Llama a la función guardarValor
-    const resultado = arduinoController.guardarValor(id, valor);
+    // Llama a la función guardarValor y espera por el resultado
+    const resultado = await arduinoController.guardarValor(id, valor);
 
+    // Asume que resultado contiene información relevante para la respuesta
     if (resultado) {
-      res.json({ message: `Valor ${valor} actualizado para el id ${id}.` });
+      res.json({ message: `Valor ${valor} actualizado para el id ${id}.`, resultado: resultado });
     } else {
-      // En este caso, siempre se devuelve true, pero puedes manejar errores si modificas la función
-      res.status(500).json({ message: 'Ocurrió un error al intentar guardar el valor.' });
+      // Maneja el caso donde resultado es falso o nulo
+      res.status(500).json({ message: 'Ocurrió un error al intentar guardar el valor.', resultado: resultado });
     }
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -241,15 +256,83 @@ router.post('/cancelar-regado/:deviceId', async (req, res) => {
 });
 
 
-router.get('/lecturas/:idDispositivo/:fechaInicio/:fechaFin', async (req, res) => {
+router.get('/lecturas/temperatura/:idDispositivo/:fechaInicio/:fechaFin', async (req, res) => {
   try {
     const { idDispositivo, fechaInicio, fechaFin } = req.params; // Obtiene el idDispositivo y las fechas de los parámetros de la URL
-    const lecturas = await arduinoController.recuperarLecturasPorFechas(idDispositivo, fechaInicio, fechaFin);
+    const lecturas = await arduinoController.recuperarLecturasTempPorFechas(idDispositivo, fechaInicio, fechaFin);
     if (lecturas.length > 0) {
       res.json({ lecturas });
     } else {
       // En este caso, se devuelve un mensaje indicando que no se encontraron lecturas
       res.status(404).json({ message: 'No se encontraron lecturas para el dispositivo y rango de fechas proporcionado.' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/lecturas/humedadAire/:idDispositivo/:fechaInicio/:fechaFin', async (req, res) => {
+  try {
+    const { idDispositivo, fechaInicio, fechaFin } = req.params; // Obtiene el idDispositivo y las fechas de los parámetros de la URL
+    const lecturasHumedad = await arduinoController.recuperarLecturasHumedadAirePorFechas(idDispositivo, fechaInicio, fechaFin);
+    if (lecturasHumedad.length > 0) {
+      res.json({ lecturas: lecturasHumedad });
+    } else {
+      // En este caso, se devuelve un mensaje indicando que no se encontraron lecturas de humedad
+      res.status(404).json({ message: 'No se encontraron lecturas de humedad para el dispositivo y rango de fechas proporcionado.' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router.get('/lecturas/humedadTierra/:idDispositivo/:fechaInicio/:fechaFin', async (req, res) => {
+  try {
+    const { idDispositivo, fechaInicio, fechaFin } = req.params; // Obtiene el idDispositivo y las fechas de los parámetros de la URL
+    const lecturasHumedad = await arduinoController.recuperarLecturasHumedadTierraPorFechas(idDispositivo, fechaInicio, fechaFin);
+    if (lecturasHumedad.length > 0) {
+      res.json({ lecturas: lecturasHumedad });
+    } else {
+      // En este caso, se devuelve un mensaje indicando que no se encontraron lecturas de humedad
+      res.status(404).json({ message: 'No se encontraron lecturas de humedad para el dispositivo y rango de fechas proporcionado.' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/estado-regado-activo/:deviceId', async (req, res) => {
+  try {
+    const { deviceId } = req.params; // Obtiene el deviceId de los parámetros de la URL
+
+    // Verifica el estado de riego del dispositivo
+    const estadoRiegoActivo = arduinoController.consultaReagadoActivo(deviceId);
+    if (estadoRiegoActivo) {
+      // Si se encuentra el dispositivo, el riego está activo
+      res.json({ 
+        message: `El riego manual para el dispositivo con ID ${deviceId} está activo.`,
+        estadoRiegoActivo: estadoRiegoActivo // Incluye el estado de riego en la respuesta
+      });
+    } else {
+      // Si no se encuentra el dispositivo, el riego está desactivado
+      res.json({ 
+        message: `El riego manual para el dispositivo con ID ${deviceId} está desactivado.`,
+        estadoRiegoActivo: estadoRiegoActivo // Incluye el estado de riego en la respuesta
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/lecturas/:idDispositivo/:fechaInicio/:fechaFin', async (req, res) => {
+  try {
+    const { idDispositivo, fechaInicio, fechaFin } = req.params; // Obtiene el idDispositivo y las fechas de los parámetros de la URL
+    const lecturasHumedad = await arduinoController.recuperarLecturasPorFechas(idDispositivo, fechaInicio, fechaFin);
+    if (lecturasHumedad.length > 0) {
+      res.json({ lecturas: lecturasHumedad });
+    } else {
+      // En este caso, se devuelve un mensaje indicando que no se encontraron lecturas de humedad
+      res.status(404).json({ message: 'No se encontraron lecturas de humedad para el dispositivo y rango de fechas proporcionado.' });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
