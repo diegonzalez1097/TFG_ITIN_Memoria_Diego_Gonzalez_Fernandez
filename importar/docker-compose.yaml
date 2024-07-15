@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  tfg:
+    build:
+      context: ./redhat8
+    image: redhat8
+    ports:
+      - "3000:3000"
+    init: true
+    volumes:
+      - ./redhat8/host:/home/tfg/host
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    stdin_open: true  
+    tty: true
+
+  db:
+    image: mysql
+    ports:
+    - "3310:3309"
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
