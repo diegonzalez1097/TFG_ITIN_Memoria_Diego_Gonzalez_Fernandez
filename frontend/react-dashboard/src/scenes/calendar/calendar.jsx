@@ -4,7 +4,7 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
-import { useNavigate } from 'react-router-dom';
+
 
 const LecturasComponent = () => {
   const [lecturas, setLecturas] = useState([]);
@@ -12,13 +12,13 @@ const LecturasComponent = () => {
   const [fechaFin, setFechaFin] = useState(new Date());
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const navigate = useNavigate();
+
 
   useEffect(() => {
     const fetchLecturas = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const userId = localStorage.getItem('userId');
+        
         const fechaInicioStr = fechaInicio.toISOString().split('T')[0];
         const fechaFinStr = fechaFin.toISOString().split('T')[0];
         const response = await fetch(`http://localhost:3000/lecturas/9/${fechaInicioStr}/${fechaFinStr}`, {

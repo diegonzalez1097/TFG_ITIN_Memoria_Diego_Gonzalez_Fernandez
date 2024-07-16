@@ -5,11 +5,11 @@ import { Button, Box, Typography } from "@mui/material";
 const ControlRiegoManual = () => {
   const [error, setError] = useState('');
   const [estadoRiego, setEstadoRiego] = useState('');
-  const [ultimoBotonActivado, setUltimoBotonActivado] = useState(() => {
-    const valorGuardado = localStorage.getItem('ultimoBotonActivado');
-    return valorGuardado !== null ? JSON.parse(valorGuardado) : null;
-  });
-  const [riegoActivo, setRiegoActivo] = useState(false);
+  //const [ultimoBotonActivado, setUltimoBotonActivado] = useState(() => {
+    //const valorGuardado = localStorage.getItem('ultimoBotonActivado');
+    //return valorGuardado !== null ? JSON.parse(valorGuardado) : null;
+  //});
+  //const [riegoActivo, setRiegoActivo] = useState(false);
   const [estadoRiegoActivo, setEstadoRiegoActivo] = useState(null);
 
   const obtenerEstadoRiegoActivo = async () => {
@@ -23,11 +23,11 @@ const ControlRiegoManual = () => {
       });
       setEstadoRiegoActivo(response.data);
       setError('');
-      setRiegoActivo(response.data.estadoRiegoActivo.presente); // Asumiendo que 'presente' es un booleano que indica si el riego está activo
+      //setRiegoActivo(response.data.estadoRiegoActivo.presente); // Asumiendo que 'presente' es un booleano que indica si el riego está activo
     } catch (error) {
       setError('Error al obtener el estado del riego');
       setEstadoRiegoActivo(null);
-      setRiegoActivo(false);
+      //setRiegoActivo(false);
     }
   };
 
@@ -51,14 +51,15 @@ const ControlRiegoManual = () => {
       );
       setEstadoRiego(valor ? "Riego activado" : "Riego detenido");
       setError('');
-      setUltimoBotonActivado(valor);
-      setRiegoActivo(valor); // Actualiza el estado de riego activo
+      //setUltimoBotonActivado(valor);
+      //setRiegoActivo(valor); // Actualiza el estado de riego activo
       obtenerEstadoRiegoActivo();
       window.location.reload();
+      
     } catch (error) {
       setError('Error al actualizar el estado del riego');
       setEstadoRiego('');
-      setRiegoActivo(false);
+      //setRiegoActivo(false);
     }
   };
 

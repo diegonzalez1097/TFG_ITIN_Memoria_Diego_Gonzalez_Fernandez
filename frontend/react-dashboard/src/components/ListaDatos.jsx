@@ -1,7 +1,7 @@
 import React from 'react';
-import { Box, Typography, Button, useTheme } from '@mui/material';
+import { Box, Button, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom'; // Ensure this import is present
-import BarChart from './BarChart';
+
 import { tokens } from "../theme";
 
 const ListaDatos = () => {

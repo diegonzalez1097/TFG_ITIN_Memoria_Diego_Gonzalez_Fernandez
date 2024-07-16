@@ -31,11 +31,7 @@ const CustomTooltip = ({ active, payload }) => {
 const CustomLineChart = () => {
   const [data, setData] = useState([]);
   const [yAxisDomain, setYAxisDomain] = useState([0, 'auto']); // Estado para el dominio del eje Y
-    const formatDate = (value) => {
-    // Suponiendo que value es una fecha en formato 'YYYY-MM-DD'
-    const date = new Date(value);
-    return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-  };
+
 
   useEffect(() => {
     
