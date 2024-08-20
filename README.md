@@ -3,7 +3,7 @@
 
 Son necesarias 2 imagenes, una de MySql y otra RedHat8. Opcionalmente se usa una imagen adminer para manejar mejor la base de datos.
 
-Con el las imagenes y el docker-compose-up proporcionado en la carpeta importar ejecutamos:
+Con las imagenes y el docker-compose-up proporcionado en la carpeta importar ejecutamos:
 
 ---Creamos los contenedores
     docker compose up
