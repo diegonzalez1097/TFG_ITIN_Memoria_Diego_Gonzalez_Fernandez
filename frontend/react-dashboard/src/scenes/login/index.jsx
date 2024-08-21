@@ -90,7 +90,7 @@ const Login = () => {
                 fullWidth
                 variant="filled"
                 type="password"
-                label="password"
+                label="Contraseña"
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.password}
@@ -114,8 +114,8 @@ const Login = () => {
 
 
 const checkoutSchema = yup.object().shape({
-  email: yup.string().email("invalid email").required("required"),
-  password: yup.string().required("required"),
+  email: yup.string().email("invalid email").required("Requerido"),
+  password: yup.string().required("Requerido"),
 });
 const initialValues = {
   email: "",

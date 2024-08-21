@@ -36,6 +36,42 @@ const LecturasComponent = () => {
     setFechaFin(hoy);
   };
 
+  const localeText = {
+    toolbarDensity: 'Densidad',
+    toolbarDensityLabel: 'Densidad',
+    toolbarDensityCompact: 'Compacto',
+    toolbarDensityStandard: 'Estándar',
+    toolbarDensityComfortable: 'Cómodo',
+    toolbarColumns: 'Columnas',
+    toolbarColumnsLabel: 'Seleccionar columnas',
+    toolbarFilters: 'Filtros',
+    toolbarFiltersLabel: 'Mostrar filtros',
+    toolbarExport: 'Exportar',
+    toolbarExportLabel: 'Exportar',
+    filterPanelAddFilter: 'Añadir filtro',
+    filterPanelDeleteIconLabel: 'Eliminar',
+    filterPanelOperators: 'Operadores',
+    filterPanelOperatorAnd: 'Y',
+    filterPanelOperatorOr: 'O',
+    filterPanelColumns: 'Columnas',
+    filterPanelInputLabel: 'Valor',
+    filterPanelInputPlaceholder: 'Filtrar valor',
+    filterOperatorContains: 'contiene',
+    filterOperatorEquals: 'igual a',
+    filterOperatorStartsWith: 'empieza con',
+    filterOperatorEndsWith: 'termina con',
+    filterOperatorIs: 'es',
+    filterOperatorNot: 'no es',
+    filterOperatorAfter: 'después de',
+    filterOperatorOnOrAfter: 'en o después de',
+    filterOperatorBefore: 'antes de',
+    filterOperatorOnOrBefore: 'en o antes de',
+    filterOperatorIsEmpty: 'está vacío',
+    filterOperatorIsNotEmpty: 'no está vacío',
+    filterOperatorIsAnyOf: 'es cualquiera de',
+    // Añade más traducciones según sea necesario
+  };
+
   const columns = [
     { field: 'idLectura', headerName: 'ID Lectura', flex: 1 },
     { field: 'idSensor', headerName: 'ID Sensor', flex: 1 },
@@ -117,6 +153,7 @@ const LecturasComponent = () => {
               sort: 'desc',
             },
           ]}
+          localeText={localeText}
         />
       </Box>
     </Box>
