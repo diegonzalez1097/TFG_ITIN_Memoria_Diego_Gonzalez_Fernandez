@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ProSidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "react-pro-sidebar/dist/css/styles.css";
 import { tokens } from "../../theme";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
@@ -9,9 +9,10 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import LoginIcon from '@mui/icons-material/Login';
 import DevicesIcon from '@mui/icons-material/Devices';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import icon from './icon.png';
 
-
-const Item = ({ title, to, icon, selected, setSelected }) => {
+const Item = ({ title, to, icon, selected, setSelected, onClick }) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   return (
@@ -20,7 +21,10 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
       style={{
         color: colors.grey[100],
       }}
-      onClick={() => setSelected(title)}
+      onClick={() => {
+        setSelected(title);
+        if (onClick) onClick();
+      }}
       icon={icon}
     >
       <Typography>{title}</Typography>
@@ -34,6 +38,16 @@ const Sidebar = () => {
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [selected, setSelected] = useState("Dashboard");
+  const location = useLocation();
+  const navigate = useNavigate(); // Usar el hook useNavigate
+
+  const logout = () => {
+    // Eliminar el token de autenticación de localStorage
+    localStorage.removeItem('authToken');
+
+    // Redirigir al usuario a la página de inicio de sesión
+    navigate('/login');
+  };
 
   return (
     <Box
@@ -73,9 +87,12 @@ const Sidebar = () => {
                 alignItems="center"
                 ml="15px"
               >
+                <Box display="flex" alignItems="center">
+                <img src={icon} alt="icon" style={{ marginRight: "10px", width: "24px", height: "24px" }} /> {/* Añade tu imagen aquí */}
                 <Typography variant="h3" color={colors.grey[100]}>
-                  ADMINIS
-                </Typography>
+                    CROPSENSE
+                  </Typography>
+                </Box>
                 <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                   <MenuOutlinedIcon />
                 </IconButton>
@@ -89,38 +106,53 @@ const Sidebar = () => {
             </Box>
           )}
 
-          <Box paddingLeft={isCollapsed ? undefined : "10%"}>
-            <Item
-              title="Dashboard"
-              to="/dashboard"
-              icon={<HomeOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Dispostivos del usuario"
-              to="/contacts"
-              icon={<DevicesIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
+          {/* Common Items */}
+          {location.pathname !== '/login' && location.pathname !== '/signin' && (
+            <>
+              <Item
+                title="Dashboard"
+                to="/dashboard"
+                icon={<HomeOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Dispositivos del usuario"
+                to="/devices"
+                icon={<DevicesIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Logout"
+                to="#"
+                icon={<ExitToAppIcon />}
+                selected={selected}
+                setSelected={setSelected}
+                onClick={logout}
+              />
+            </>
+          )}
 
-            <Item
-              title="Crear Usuario"
-              to="/form"
-              icon={<PersonOutlinedIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-            <Item
-              title="Login"
-              to="/"
-              icon={<LoginIcon />}
-              selected={selected}
-              setSelected={setSelected}
-            />
-
-          </Box>
+          {/* Items for /login and /signin */}
+          {(location.pathname === '/login' || location.pathname === '/signin') && (
+            <>
+              <Item
+                title="Crear Usuario"
+                to="/signin"
+                icon={<PersonOutlinedIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              <Item
+                title="Login"
+                to="/login"
+                icon={<LoginIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+            </>
+          )}
         </Menu>
       </ProSidebar>
     </Box>

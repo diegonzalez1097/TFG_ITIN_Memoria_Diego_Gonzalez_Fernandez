@@ -61,7 +61,7 @@ const ControlRiegoDesactivar = () => {
           color="secondary"
           onClick={cancelarRiego}
         >
-          Desactivar Riego
+          Desactivar Riego Manual
         </Button>
       )}
     </Box>

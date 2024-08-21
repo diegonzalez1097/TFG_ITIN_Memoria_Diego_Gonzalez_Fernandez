@@ -1,16 +1,16 @@
 import React from 'react';
 import { Box, Button, useTheme } from '@mui/material';
-import { useNavigate } from 'react-router-dom'; // Ensure this import is present
+import { useNavigate } from 'react-router-dom';
 
 import { tokens } from "../theme";
 
 const ListaDatos = () => {
     const theme = useTheme();
     const colors = tokens(theme.palette.mode);
-    const navigate = useNavigate(); // Use useNavigate here
+    const navigate = useNavigate(); 
 
     const redirectToView = () => {
-        navigate('../calendar'); // Use navigate instead of history.push
+        navigate('../Registro'); 
     };
 
     return (
@@ -27,7 +27,7 @@ const ListaDatos = () => {
         onClick={redirectToView}
         sx={{ margin: "20px" }} // Ajusta el margen según necesites
       >
-        Ir a otra vista
+        Historial
       </Button>
     </Box>
   );

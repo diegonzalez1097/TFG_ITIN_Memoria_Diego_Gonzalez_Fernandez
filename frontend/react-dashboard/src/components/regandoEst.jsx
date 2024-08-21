@@ -58,11 +58,11 @@ const EstadoRiego = () => {
         color={resultadoRiego ? 'success' : 'default'}
         variant="outlined"
         sx={{
-          fontSize: '1.8rem', // Aumenta el tamaño de la fuente
-          height: '90px', // Aumenta la altura del Chip
-          borderRadius: '45px', // Ajusta el radio del borde para mantener la proporción
-          padding: '0 100px', // Aumenta el padding horizontal para más espacio interno
-          mt: '15px', // Margen superior
+          fontSize: '1.8rem', 
+          height: '90px', 
+          borderRadius: '45px', 
+          padding: '0 100px', 
+          mt: '15px', 
         }}
       />
       )}

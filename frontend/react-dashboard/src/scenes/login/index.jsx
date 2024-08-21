@@ -28,7 +28,7 @@ const Login = () => {
       });
   
       if (!response.ok) {
-        throw new Error('Something went wrong');
+        throw new Error('Usuario o contraseña incorrectos');
       }
   
       const data = await response.json();
@@ -36,11 +36,13 @@ const Login = () => {
       localStorage.setItem('userId', data.idUsuario); // Guardar el ID del usuario
 
       // Paso 3: Redireccionar después del éxito
-      navigate('/contacts'); // Use navigate to redirect to the contacts page
-      alert('Login exitoso. Token: ' + localStorage.getItem('authToken') + ', ID del Usuario: ' + localStorage.getItem('userId'));
+      navigate('/devices'); // Use navigate to redirect to the contacts page
+      //alert('Login exitoso. Token: ' + localStorage.getItem('authToken') + ', ID del Usuario: ' + localStorage.getItem('userId'));
       
     } catch (error) {
       console.error('Error:', error);
+      alert('Error en el login: ' + error.message);
+
     }
   };
 

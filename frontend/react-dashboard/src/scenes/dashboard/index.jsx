@@ -14,6 +14,7 @@ import ThermostatAutoIcon from '@mui/icons-material/ThermostatAuto';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import WaterIcon from '@mui/icons-material/Water';
 import AirIcon from '@mui/icons-material/Air';
+import axiosInstance from "../../axiosInstance";
 
 
 // Función para convertir camelCase a texto con espacios
@@ -47,30 +48,25 @@ const sensorUnits = {
   
 };
   
-  useEffect(() => { 
-    const fetchSensorReadings = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const idDispositivo = localStorage.getItem('idDispositivo');
-        const response = await fetch(`http://localhost:3000/sensor/readings/${idDispositivo}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const { readings } = await response.json(); // Extraer readings de la respuesta
-        setSensores(readings); // Actualizar el estado con los readings
-      } catch (error) {
-        console.error("Error al cargar los datos de los arduinos:", error);
+useEffect(() => { 
+  const fetchSensorReadings = async () => {
+    try {
+      const idDispositivo = localStorage.getItem('idDispositivo');
+      const response = await axiosInstance.get(`http://localhost:3000/sensor/readings/${idDispositivo}`);
+      
+      if (response.status !== 200) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
-  
-    fetchSensorReadings();
-  }, [idDispositivo]);
+
+      const { readings } = response.data; // Extraer readings de la respuesta
+      setSensores(readings); // Actualizar el estado con los readings
+    } catch (error) {
+      console.error("Error al cargar los datos de los arduinos:", error);
+    }
+  };
+
+  fetchSensorReadings();
+}, [idDispositivo]);
 
 
 
@@ -111,7 +107,74 @@ const sensorUnits = {
           </Box>
         ))}
 
-
+        {/* ROW 2 */}
+        
+        <Box
+          gridColumn="span 4"
+          gridRow="span 2"
+          backgroundColor={colors.primary[400]}
+          p="30px"
+        >
+            <Typography
+              variant="h5"
+              fontWeight="600"
+              color={colors.greenAccent[600]} 
+              style={{ fontSize: "22px" }} 
+            >
+              Estado de riego
+            </Typography>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            mt="25px"
+          >
+            <RegadoEst />
+          </Box>
+        </Box>
+        <Box
+          gridColumn="span 4"
+          gridRow="span 2"
+          backgroundColor={colors.primary[400]}
+          p="30px"
+        >
+            <Typography
+              variant="h5"
+              fontWeight="600"
+              color={colors.greenAccent[600]} // Establece el color del texto
+              style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
+            >
+              Consultar registro historico
+            </Typography>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="center"
+            mt="25px"
+          >
+            <ListaDatos />
+          </Box>
+        </Box>
+        <Box
+          gridColumn="span 4"
+          gridRow="span 2"
+          backgroundColor={colors.primary[400]}
+          padding="30px"
+        >
+            <Typography
+              variant="h5"
+              fontWeight="600"
+              color={colors.greenAccent[600]} // Establece el color del texto
+              style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
+            >
+              Gestión Regado Manual
+            </Typography>
+          <Box height="200px">
+            
+            <DesRegar />
+            <RiegoManual  />
+          </Box>
+        </Box>
         {/* ROW 2 */}
         <Box
           gridColumn="span 12"
@@ -218,78 +281,6 @@ const sensorUnits = {
           </Box>
           <Box height="250px" m="-20px 0 0 0">
             <ChartHumT isDashboard={true}/>
-          </Box>
-        </Box>
-        
-        
-        
-
-        {/* ROW 3 */}
-        
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-            <Typography
-              variant="h5"
-              fontWeight="600"
-              color={colors.greenAccent[600]} // Establece el color del texto
-              style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
-            >
-              Estado de riego
-            </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <RegadoEst />
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          p="30px"
-        >
-            <Typography
-              variant="h5"
-              fontWeight="600"
-              color={colors.greenAccent[600]} // Establece el color del texto
-              style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
-            >
-              Estado de riego
-            </Typography>
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            mt="25px"
-          >
-            <ListaDatos />
-          </Box>
-        </Box>
-        <Box
-          gridColumn="span 4"
-          gridRow="span 2"
-          backgroundColor={colors.primary[400]}
-          padding="30px"
-        >
-            <Typography
-              variant="h5"
-              fontWeight="600"
-              color={colors.greenAccent[600]} // Establece el color del texto
-              style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
-            >
-              Gestión Regado Manual
-            </Typography>
-          <Box height="200px">
-            
-            <DesRegar />
-            <RiegoManual  />
           </Box>
         </Box>
         
