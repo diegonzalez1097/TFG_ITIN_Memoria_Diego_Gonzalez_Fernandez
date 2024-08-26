@@ -197,7 +197,7 @@ useEffect(() => {
               color={colors.greenAccent[600]} // Establece el color del texto
               style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
             >
-              Gráfica de mediciones de temperatura de los ultimos dias
+              Gráfica de mediciones de temperatura de los últimos dias
             </Typography>
 
                 
@@ -234,7 +234,7 @@ useEffect(() => {
               color={colors.greenAccent[600]} // Establece el color del texto
               style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
             >
-              Gráfica de mediciones de humedad del aire de los ultimos dias
+              Gráfica de mediciones de humedad del aire de los últimos dias
             </Typography>
 
                 
@@ -271,7 +271,7 @@ useEffect(() => {
               color={colors.greenAccent[600]} // Establece el color del texto
               style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
             >
-              Gráfica de mediciones de humedad de la tierra de los ultimos dias
+              Gráfica de mediciones de humedad de la tierra de los últimos dias
             </Typography>
 
                 

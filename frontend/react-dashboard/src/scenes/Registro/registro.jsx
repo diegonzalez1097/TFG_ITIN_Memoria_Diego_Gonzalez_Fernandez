@@ -7,6 +7,12 @@ import Header from "../../components/Header";
 import { useTheme } from "@mui/material";
 
 const LecturasComponent = () => {
+  const [sortModel, setSortModel] = useState([
+    {
+      field: 'idLectura', 
+      sort: 'desc', 
+    },
+  ]);
   const [lecturas, setLecturas] = useState([]);
   const [fechaInicio, setFechaInicio] = useState(new Date('1970-01-01'));
   const [fechaFin, setFechaFin] = useState(new Date());
@@ -22,6 +28,7 @@ const LecturasComponent = () => {
         setLecturas(response.data.lecturas);
       } catch (error) {
         console.error("Error al cargar las lecturas:", error);
+        setLecturas([]);
       }
     };
 
@@ -74,10 +81,10 @@ const LecturasComponent = () => {
 
   const columns = [
     { field: 'idLectura', headerName: 'ID Lectura', flex: 1 },
-    { field: 'idSensor', headerName: 'ID Sensor', flex: 1 },
-    { field: 'fechaHora', headerName: 'Fecha y Hora', flex: 2, valueGetter: (params) => formatearFecha(params.value) },
-    { field: 'valor', headerName: 'Valor', type: 'number', flex: 1 },
-    { field: 'tipoSensor', headerName: 'Tipo de Sensor', flex: 1.5 },
+    { field: 'idSensor', headerName: 'ID Sensor', flex: 1 ,  sortable: false},
+    { field: 'fechaHora', headerName: 'Fecha y Hora', flex: 2, valueGetter: (params) => formatearFecha(params.value) ,  sortable: false},
+    { field: 'valor', headerName: 'Valor', type: 'number', flex: 1 ,  sortable: false},
+    { field: 'tipoSensor', headerName: 'Tipo de Sensor', flex: 1.5 ,  sortable: false},
   ];
 
   return (
@@ -97,20 +104,55 @@ const LecturasComponent = () => {
           <Box display="flex" justifyContent="space-between" width="100%" marginTop="20px">
             <Typography variant="h6" color="textPrimary">Seleccione las fechas</Typography>
             
-            <Box display="flex" justifyContent="flex-start" width="100%">
-              <input
-                type="date"
-                value={fechaInicio.toISOString().split('T')[0]}
-                onChange={(e) => setFechaInicio(new Date(e.target.value))}
-                style={{ padding: '10px', margin: '5px' }} // Estilo inline como ejemplo
-              />
-              <input
-                type="date"
-                value={fechaFin.toISOString().split('T')[0]}
-                onChange={(e) => setFechaFin(new Date(e.target.value))}
-                style={{ padding: '10px', margin: '5px' }} // Estilo inline como ejemplo
-              />
-            </Box>
+
+  
+              <Box display="flex" justifyContent="flex-start" width="100%">
+                <input
+                  type="date"
+                  value={fechaInicio.toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const newFechaInicio = new Date(e.target.value);
+                    if (newFechaInicio <= fechaFin) {
+                      setFechaInicio(newFechaInicio);
+                    } else {
+                      alert('La fecha de inicio no puede ser mayor que la fecha de final.');
+                    }
+                  }}
+                  style={{ padding: '10px', margin: '5px', pointerEvents: 'none' }} 
+                  onClick={(e) => e.target.showPicker()} 
+                />
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => document.querySelector('input[type="date"]').showPicker()} 
+                  style={{ padding: '10px', margin: '5px' }}
+                >
+                  Seleccionar Fecha Inicio
+                </Button>
+                <input
+                  type="date"
+                  value={fechaFin.toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const newFechaFin = new Date(e.target.value);
+                    if (newFechaFin >= fechaInicio) {
+                      setFechaFin(newFechaFin);
+                    } else {
+                      alert('La fecha de final no puede ser menor que la fecha de inicio.');
+                    }
+                  }}
+                  style={{ padding: '10px', margin: '5px', pointerEvents: 'none' }} 
+                  onClick={(e) => e.target.showPicker()} 
+                />
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={() => document.querySelectorAll('input[type="date"]')[1].showPicker()} // Mostrar el selector de fechas al hacer clic en el botón
+                  style={{ padding: '10px', margin: '5px' }}
+                >
+                  Seleccionar Fecha Fin
+                </Button>
+              </Box>
+
           </Box>
         </Box>
       <Box
@@ -147,12 +189,8 @@ const LecturasComponent = () => {
           columns={columns}
           components={{ Toolbar: GridToolbar }}
           getRowId={(row) => row.idLectura}
-          sortModel={[
-            {
-              field: 'fechaHora',
-              sort: 'desc',
-            },
-          ]}
+          sortModel={sortModel}
+          onSortModelChange={(newSortModel) => setSortModel(newSortModel)}
           localeText={localeText}
         />
       </Box>

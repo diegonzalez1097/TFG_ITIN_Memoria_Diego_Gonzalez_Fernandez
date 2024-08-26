@@ -4,6 +4,59 @@ import * as yup from "yup";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Header from "../../components/Header";
 import { useNavigate } from "react-router-dom";
+import React from 'react';
+import { LinearProgress, Typography } from '@mui/material';
+
+const PasswordStrengthMeter = ({ password }) => {
+  const calculatePasswordStrength = (password) => {
+    let strength = 0;
+    if (password.length > 5) strength += 1;
+    if (password.length > 7) strength += 1;
+    if (/[A-Z]/.test(password)) strength += 1;
+    if (/[0-9]/.test(password)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+    return strength;
+  };
+
+  const getColor = (strength) => {
+    switch (strength) {
+      case 0:
+      case 1:
+        return 'red';
+      case 2:
+        return 'orange';
+      case 3:
+        return 'yellow';
+      case 4:
+        return 'lightgreen';
+      case 5:
+        return 'green';
+      default:
+        return 'grey';
+    }
+  };
+
+  const strength = calculatePasswordStrength(password);
+  const strengthPercentage = (strength / 5) * 100;
+  const color = getColor(strength);
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <LinearProgress
+        variant="determinate"
+        value={strengthPercentage}
+        sx={{
+          '& .MuiLinearProgress-bar': {
+            backgroundColor: color,
+          },
+        }}
+      />
+      <Typography variant="caption">
+        Fortaleza: {strengthPercentage}%
+      </Typography>
+    </Box>
+  );
+};
 
 const Signup = () => {
   const isNonMobile = useMediaQuery("(min-width:600px)");
@@ -103,6 +156,7 @@ const Signup = () => {
                 helperText={touched.password && errors.password}
                 sx={{ gridColumn: "span 4" }}
               />
+              <PasswordStrengthMeter password={values.password} />
               <TextField
                 fullWidth
                 variant="filled"
@@ -135,7 +189,7 @@ const signupSchema = yup.object().shape({
   password: yup.string().required("required"),
   confirmPassword: yup
     .string()
-    .oneOf([yup.ref("password"), null], "Passwords must match")
+    .oneOf([yup.ref("password"), null], "Las contraseñas no coinciden")
     .required("required"),
 });
 
