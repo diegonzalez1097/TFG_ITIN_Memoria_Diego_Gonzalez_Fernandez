@@ -144,7 +144,7 @@ useEffect(() => {
               color={colors.greenAccent[600]} // Establece el color del texto
               style={{ fontSize: "22px" }} // Establece el tamaño de la fuente
             >
-              Consultar registro historico
+              Consultar registro histórico
             </Typography>
           <Box
             display="flex"

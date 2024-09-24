@@ -24,8 +24,8 @@ OneWire oneWire(oneWireBus);
 DallasTemperature sensors (&oneWire);
 
 // Define los valores de medición para seco y agua
-const int medicionSeco = 552;
-const int medicionAgua = 216;
+const int medicionSeco = 500;
+const int medicionAgua = 100;
 
 // Variables para almacenar el nivel de humedad del suelo
 int MoistureLevel = 0;
@@ -52,7 +52,7 @@ String token;
 HTTPClient http;
 
 // Define la dirección base del servidor
-const char* servidor = "http://192.168.1.135:3000";
+const char* servidor = "http://192.168.1.143:3000";
 
 int idDispositivo = -1;  // Inicializa con un valor por defecto
 
@@ -309,7 +309,7 @@ void loop() {
   float TemperaturaTierra = sensors.getTempCByIndex(0);
   // Lee la humedad del suelo del sensor analógico
   MoistureLevel = analogRead(sensorPin);  
-  //Serial.print(MoistureLevel);
+  Serial.print(MoistureLevel);
   // Mapea el nivel de humedad del suelo a un porcentaje
   HumedadTierra = map(MoistureLevel, medicionSeco, medicionAgua, 0, 100);
   // Verifica si el porcentaje de humedad del suelo es 100, 0 o algo intermedio
