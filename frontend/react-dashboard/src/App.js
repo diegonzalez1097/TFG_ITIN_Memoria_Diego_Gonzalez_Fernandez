@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 import Dashboard from "./scenes/dashboard";
-import Team from "./scenes/team";
 import Devices from "./scenes/devices";
 import Signin from "./scenes/signin";
 import Login from "./scenes/login";
@@ -27,12 +26,12 @@ function App() {
             <Topbar setIsSidebar={setIsSidebar} />
             <Routes>
               <Route path="/dashboard" element={<ProtectedRoute element={Dashboard} />} />
-              <Route path="/team" element={<ProtectedRoute element={Team} />} />
               <Route path="/devices" element={<ProtectedRoute element={Devices} />} />
               <Route path="/registro" element={<ProtectedRoute element={Registro} />} />
               <Route path="/signin" element={<Signin />} />
               <Route path="/login" element={<Login />} />
-              <Route path="*" element={<Navigate to="/login" />} /> {/* Redirigir a login por defecto */}
+              <Route path="*" element={<Navigate to="/login" />} /> 
+              {/* Redirigir a login por defecto */}
 
             </Routes>
           </main>
