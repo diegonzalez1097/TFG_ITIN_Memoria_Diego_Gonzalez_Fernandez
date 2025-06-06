@@ -163,8 +163,8 @@ std::pair<String, int> registerDevice(WiFiClient& client, const char* servidor, 
   doc["ultimaIP"] = WiFi.localIP().toString();
   doc["fechaUltimaComunicacion"] = fechaHora;
   JsonObject gpsCoordinates = doc.createNestedObject("gpsCoordinates");
-  gpsCoordinates["x"] = 43.550299; // reemplaza con la coordenada x de tu dispositivo
-  gpsCoordinates["y"] = -5.922112; // reemplaza con la coordenada y de tu dispositivo
+  gpsCoordinates["x"] = 43.550299; 
+  gpsCoordinates["y"] = -5.922112; 
   doc["mac"] = WiFi.macAddress();
 
   // Convierte el objeto JSON a una cadena
@@ -326,34 +326,6 @@ void loop() {
       //Serial.println("%");
   }
 
-/*
-  // Crea un JsonArray para almacenar los datos de lectura
-  DynamicJsonDocument doc(1024);
-  JsonArray readingsData = doc.createNestedArray("readingsData");
-
-  // Crea un JsonObject para cada lectura y lo agrega al JsonArray
-  JsonObject tempAire = readingsData.createNestedObject();
-  tempAire["sensorId"] = 1;
-  tempAire["dateTime"] = fechaHora;
-  tempAire["value"] = Temperatura;
-
-  JsonObject humAire = readingsData.createNestedObject();
-  humAire["sensorId"] = 2;
-  humAire["dateTime"] = fechaHora;
-  humAire["value"] = HumedadAire;
-
-  JsonObject humTierra = readingsData.createNestedObject();
-  humTierra["sensorId"] = 3;
-  humTierra["dateTime"] = fechaHora;
-  humTierra["value"] = HumedadTierra;
-
-  JsonObject tempTierra = readingsData.createNestedObject();
-  tempTierra["sensorId"] = 4;
-  tempTierra["dateTime"] = fechaHora;
-  tempTierra["value"] = TemperaturaTierra;
-  
-*/
-  
   
   DynamicJsonDocument doc(1024);
   JsonArray readingsData = doc.createNestedArray("readingsData");
@@ -374,20 +346,18 @@ void loop() {
     } else if (tipoSensor == "HumedadAire") {
       sensorData["value"] = HumedadAire;
     } else if (tipoSensor == "HumedadTierra") {
-      // Suponiendo que tienes una función para leer la humedad de la tierra
+      
       sensorData["value"] = HumedadTierra;
     } else if (tipoSensor == "TemperaturaTierra") {
-      // Suponiendo que tienes una función para leer la temperatura de la tierra
+      
       sensorData["value"] = TemperaturaTierra;
     }
   }
 
   JsonObject arduinoData = doc.createNestedObject("arduinoData");
-  arduinoData["idDispositivo"] = idDispositivo; // Reemplaza con la variable correspondiente si es necesario
-  arduinoData["ultimaIP"] = WiFi.localIP().toString(); // Reemplaza con la variable correspondiente si es necesario
-  arduinoData["fechaUltimaComunicacion"] = fechaHora; // Reemplaza con la variable correspondiente si es necesario
-
-  //String respuesta = obtenerDatosSensor(idDispositivo, token);
+  arduinoData["idDispositivo"] = idDispositivo; 
+  arduinoData["ultimaIP"] = WiFi.localIP().toString(); 
+  arduinoData["fechaUltimaComunicacion"] = fechaHora;
 
   //Serial.print(respuesta);
   bool necesitaRegar = sendSensorData(http, client, token, doc);
