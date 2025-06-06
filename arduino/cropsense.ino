@@ -172,7 +172,7 @@ std::pair<String, int> registerDevice(WiFiClient& client, const char* servidor, 
   serializeJson(doc, deviceData);
   serializeJsonPretty(doc, Serial);
 
-  // Configura los encabezados de la solicitud
+  // Configura los encabezados de la solicitu
   http.addHeader("Content-Type", "application/json");
 
   // Realiza una solicitud POST al endpoint
